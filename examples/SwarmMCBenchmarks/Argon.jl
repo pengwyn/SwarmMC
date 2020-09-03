@@ -1,7 +1,7 @@
 module Argon
 
-using DanUtils, Constants
-@reexport using SwarmMC
+using SwarmMC
+using DelimitedFiles
 
 const Ar_mass = 72820.74916940005amu
 

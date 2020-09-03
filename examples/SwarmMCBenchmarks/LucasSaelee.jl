@@ -1,8 +1,6 @@
 module LucasSaelee
 
-using DanUtils,Constants
-
-@reexport using SwarmMC
+using SwarmMC
 
 LSFunc(eps) = 0.1u"Å^2"*(eps/eV - 15.6)
 

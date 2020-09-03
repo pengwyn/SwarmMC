@@ -1,8 +1,7 @@
 
 module NessRobsonSharing
 
-using DanUtils, Constants
-@reexport using SwarmMC
+using SwarmMC
 
 NRCrossSection(eps) = 1u"Å^2"
 

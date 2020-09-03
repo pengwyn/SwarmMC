@@ -1,8 +1,7 @@
 
 module PercusYevick
 
-using DanUtils, Constants
-@reexport using SwarmMC
+using SwarmMC
 using Dierckx, UnitfulDierckx
 
 using PercusYevickSSF

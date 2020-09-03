@@ -1,9 +1,7 @@
 
 module ReidAniso
 
-using DanUtils, Constants
-@reexport using SwarmMC
-using BisectInterp
+using SwarmMC
 
 RiedInelastic(eps) = 0.4*(eps - 0.516eV)*u"Å^2/eV"
 
@@ -119,7 +117,7 @@ using ForwardDiff
         #mat .+= mat[1:1,:]
         mat ./= mat[end:end,:]
 
-        aniso_var = BisectInterp.INTERP2D(epsrange, costhrange, mat)
+        aniso_var = SwarmMC.BisectInterp.INTERP2D(epsrange, costhrange, mat)
     elseif method == :legendre
         func = Aniso2[model]
         l_list = 0:2

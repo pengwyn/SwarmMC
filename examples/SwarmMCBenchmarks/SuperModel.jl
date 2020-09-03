@@ -1,8 +1,7 @@
 
 module SuperModel
 
-using DanUtils, Constants
-@reexport using SwarmMC
+using SwarmMC
 
 SuperModelElastic(eps) = (1u"Å^2" + 5u"Å^2/eV"*eps)
 SuperModelInelastic(eps) = 1u"Å^2"

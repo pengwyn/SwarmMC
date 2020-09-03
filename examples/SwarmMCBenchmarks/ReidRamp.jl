@@ -1,7 +1,6 @@
 module ReidRamp
 
-using DanUtils, Constants
-@reexport using SwarmMC
+using SwarmMC
 
 ReidInelastic(eps) = 10u"Å^2"*(eps/eV - 0.2)
 

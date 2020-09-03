@@ -1,10 +1,7 @@
 
 module Hardsphere
 
-using Reexport
-using AndExport
-
-@reexport using SwarmMC
+using SwarmMC
 
 function CollFreqs(params, gas, ptype)
     elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_HARDSPHERE(5u"Å^2"))
@@ -12,7 +9,7 @@ function CollFreqs(params, gas, ptype)
     [elastic]
 end
 
-@xport function SetupParams(tmtr ; m0=4amu, ETd=1u"Td")
+@xport function SetupParams(tmtr ; m0=4amu, ETd=1Td)
     p = PARAMS(init_style=PIS_SEPARABLE(PIVS_ISOTROPIC(0.1eV)))
     n0 = 1e-6u"Å^-3"
     E = EFromETd(ETd, n0)
