@@ -12,7 +12,7 @@ using AutoParameters
 using MsgWrap
 
 include("extmodules/DanUtils.jl")
-using .DanUtils
+@reexport using .DanUtils
 
 include("extmodules/Constants.jl")
 @reexport using .Constants
