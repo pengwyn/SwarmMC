@@ -1,0 +1,3 @@
+
+import AnalyseBenchmarksPreComp
+AnalyseBenchmarksPreComp.Main()

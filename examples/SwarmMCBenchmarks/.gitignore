@@ -1,0 +1,6 @@
+runs_*
+*.eps
+*.png
+*.pdf
+*.svg
+slurmoutputs/
