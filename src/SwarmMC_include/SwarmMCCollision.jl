@@ -71,7 +71,7 @@ end
 SelectCollCosTheta(angle_dist_cum::Nothing, eps) = rand()*2 - 1
 SelectCollCosTheta(angle_dist_cum::Function, eps) = angle_dist_cum(eps, rand())
 function SelectCollCosTheta(angle_dist_cum::INTERP2D, eps)
-    BisectInterp.InterpRevY(angle_dist_cum, eps, rand())
+    BisectInterpInternal.InterpRevY(angle_dist_cum, eps, rand())
 end
 SelectCollCosTheta(angle_dist_cum::DELTA_ANGLE_DIST, eps) = AngleFromDeltaRvals(eps, rand(), angle_dist_cum.eps_list, angle_dist_cum.x_locs, angle_dist_cum.Rvals)
     

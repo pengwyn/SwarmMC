@@ -108,8 +108,8 @@ using ForwardDiff
         aniso_var = nothing
 		method = :func
     elseif method == :grid
-        epsrange = linspace(0,1,11)*eV
-        costhrange = linspace(-1,1,1001)
+        epsrange = LinRange(0,1,11)*eV
+        costhrange = LinRange(-1,1,1001)
 
         func = Aniso2[model]
         mat = [func(eps, costh) for costh=costhrange, eps=epsrange]
@@ -117,14 +117,14 @@ using ForwardDiff
         #mat .+= mat[1:1,:]
         mat ./= mat[end:end,:]
 
-        aniso_var = SwarmMC.BisectInterp.INTERP2D(epsrange, costhrange, mat)
+        aniso_var = SwarmMC.INTERP2D(epsrange, costhrange, mat)
     elseif method == :legendre
         func = Aniso2[model]
         l_list = 0:2
         legendre_poly = LegendrePoly.(l_list)
         #sigma_l = [(2l+1)/4pi * quadgk(x -> ForwardDiff.derivative(x->func(1.,x), x)*legendre_poly[lind](x), -1.,1.)[1] for (lind,l) in enumerate(l_list)]
         sigma_l = [quadgk(x -> ForwardDiff.derivative(x->func(1.,x), x)*legendre_poly[lind](x), -1.,1.)[1] for (lind,l) in enumerate(l_list)]
-        aniso_var = SwarmMC.MatchWithDeltas([1eV], sigma_l[newaxis,:])
+        aniso_var = SwarmMC.MatchWithDeltas([1eV], reshape(sigma_l,1,:)*SwarmMC.uσ)
     end
 
     p.gen_cf = (args...) -> CollFreqs(args..., cs, aniso_var)

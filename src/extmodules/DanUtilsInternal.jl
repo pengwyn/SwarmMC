@@ -1,4 +1,4 @@
-module DanUtils
+module DanUtilsInternal
 
 ################################################################
 # * Default imports that I expect

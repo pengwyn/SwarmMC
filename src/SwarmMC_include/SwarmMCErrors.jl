@@ -78,7 +78,7 @@ function AutocorrelationFactorWithFunc(times, m)
 
     # Going to only take the first half, since the lengths get too small otherwise
     #intchi = trapz(dt*(0:length(chi)-1), chi)
-    intchi = DanUtils.trapz(dt*(0:length(chi)÷2-1), chi[1:length(chi)÷2])
+    intchi = DanUtilsInternal.trapz(dt*(0:length(chi)÷2-1), chi[1:length(chi)÷2])
     tauapprox = intchi / chi[1]
 
     return tauapprox, chi

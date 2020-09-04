@@ -1,6 +1,6 @@
-module BisectInterp
+module BisectInterpInternal
 
-using ..DanUtils
+using ..DanUtilsInternal
 
 export INTERP1D, INTERP2D, Interp
 export Interp1D

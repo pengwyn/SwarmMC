@@ -31,7 +31,7 @@ function MatchWithDeltas(eps_list, sigma_l ; num_grid=size(sigma_l,2), normalise
     maxl = size(sigma_l,2) - 1
     @assert maxl > 0
 
-    x_locs = linspace(-1, 1, num_grid)
+    x_locs = LinRange(-1, 1, num_grid)
 
     coeffsmat = hcat([Pl(x, lmax=maxl) for x in x_locs]...)
 

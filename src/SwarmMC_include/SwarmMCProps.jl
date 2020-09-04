@@ -30,7 +30,7 @@ function Base.:+(x::T, y::T) where {T <: MEAS_LOG2}
     @argcheck x.ptype_ind == y.ptype_ind
     @argcheck x.cf_ind == y.cf_ind
 
-    vals,log2w = DanUtils.UnpackBroadcast(CombineValWithLog2, x.vals, x.log2w, y.vals, y.log2w)
+    vals,log2w = DanUtilsInternal.UnpackBroadcast(CombineValWithLog2, x.vals, x.log2w, y.vals, y.log2w)
 
     T(x.label, x.mbin, x.ptype_ind, x.cf_ind, vals, log2w)
 end
@@ -190,7 +190,7 @@ end
     dE = diff(params.eps_bin_grid)[1:end-1]
 
     num = base ./ dE
-    norm = DanUtils.trapz(E, num)
+    norm = DanUtilsInternal.trapz(E, num)
     num /= norm
     num ./= sqrt.(E)
     

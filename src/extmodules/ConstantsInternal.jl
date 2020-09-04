@@ -1,4 +1,4 @@
-module Constants
+module ConstantsInternal
 
 using Reexport
 @reexport using Unitful, UnitfulAtomic

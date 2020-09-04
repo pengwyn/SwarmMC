@@ -624,6 +624,7 @@ EpsFromVel(part::PARTICLE) = EpsFromVel(part.vel, part.cur_mass)
 
 export EFromETd, ETdFromE
 EFromETd(ETd::Number, tot_dens::Number) = ETd == 0 ? nothing : ETd * tot_dens
+EFromETd(ETd::Number, tot_dens::Function, dir) = ETd == 0 ? nothing : (pos,time) -> ETd * tot_dens(pos) * dir
 EFromETd(ETd::Symbol, tot_dens) = :inhomogeneous
 EFromETd(ETd::Nothing, tot_dens) = nothing
 
@@ -660,7 +661,7 @@ function EpsBin(eps, eps_bin_grid, cur_bin=1)
     if eps_bin_grid[cur_bin] < eps < eps_bin_grid[cur_bin+1]
         return cur_bin
     else
-        ind = BisectInterp.BisectInsert(eps, eps_bin_grid)
+        ind = BisectInterpInternal.BisectInsert(eps, eps_bin_grid)
         return ind - 1
     end
 end
@@ -673,14 +674,14 @@ end
 ZBin(pos::PosVec, z_grid) = ZBin(pos[3], z_grid)
 function ZBin(z, z_grid)
     # Don't need to be clever with the bins here since this is only called at initialisation.
-    ind = BisectInterp.BisectInsert(z, z_grid)
+    ind = BisectInterpInternal.BisectInsert(z, z_grid)
     return ind - 1
 end
 
 RBin(pos::XYZ, r_grid) = RBin(sqrt(pos[1]^2 + pos[2]^2), r_grid)
 function RBin(r, r_grid)
     # Don't need to be clever with the bins here since this is only called at initialisation.
-    ind = BisectInterp.BisectInsert(r, r_grid)
+    ind = BisectInterpInternal.BisectInsert(r, r_grid)
     return ind - 1
 end
 

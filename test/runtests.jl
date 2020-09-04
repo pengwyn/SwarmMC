@@ -4,7 +4,13 @@ using SwarmMC
 pushfirst!(LOAD_PATH, joinpath(dirname(pathof(SwarmMC)), "..", "examples","SwarmMCBenchmarks"))
 
 @testset begin
-    @testset "Benchmark $mod" for mod in [:Hardsphere, :ConstIon, :LucasSaelee, :MagneticField, :Maxwell, :NessRobsonLoss, :NessRobsonSharing, :PercusYevick, :ReidAniso, :ReidRamp, :SuperModel, :Argon]
+    if "MOD_LIST" in keys(ENV)
+        mod_list = split(ENV["MOD_LIST"], ',') .|>  Symbol
+    else
+        mod_list =[:Hardsphere, :ConstIon, :LucasSaelee, :MagneticField, :Maxwell, :NessRobsonLoss, :NessRobsonSharing, :PercusYevick, :ReidAniso, :ReidRamp, :SuperModel, :Argon]
+    end
+
+    @testset "Benchmark $mod" for mod in mod_list
         filename = "test_$(string(mod)).jl"
         if isfile(filename)
             include(filename)

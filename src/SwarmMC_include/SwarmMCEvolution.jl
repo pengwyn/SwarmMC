@@ -292,6 +292,7 @@ function ZBinCondition(out,u,t,int)
     @unpack pos = UnpackVector(u)
     z = pos[3]
 
+    @unpack params,part = int.p
     z_min = params.z_bin_grid[part.z_bin]
     z_max = params.z_bin_grid[part.z_bin+1]
 
@@ -304,16 +305,21 @@ function ZBinAffect!(int, indx)
     if indx == 1
         # Down
         int.p.part.z_bin -= 1
+        # Need to update int so it understands which one fired
+        int.vector_event_last_time = 2
     else
         # Up
         int.p.part.z_bin += 1
+        int.vector_event_last_time = 1
     end
 end
-const ZBinCallback = VectorContinuousCallback(ZBinCondition, ZBinAffect!, nothing, 2)
+const ZBinCallback = VectorContinuousCallback(ZBinCondition, ZBinAffect!, nothing, 2, reltol=1e-7, abstol=0)
 
 function RBinCondition(out,u,t,int)
     @unpack pos = UnpackVector(u)
     rsqr = sum(pos.^2)
+
+    @unpack params,part = int.p
 
     rsqr_min = params.r_bin_grid[part.r_bin]^2
     rsqr_max = params.r_bin_grid[part.r_bin+1]^2
@@ -327,12 +333,15 @@ function RBinAffect!(int, indx)
     if indx == 1
         # Down
         int.p.part.r_bin -= 1
+        # Need to update int so it understands which one fired
+        int.vector_event_last_time = 2
     else
         # Up
         int.p.part.r_bin += 1
+        int.vector_event_last_time = 1
     end
 end
-const RBinCallback = VectorContinuousCallback(RBinCondition, RBinAffect!, nothing, 2)
+const RBinCallback = VectorContinuousCallback(RBinCondition, RBinAffect!, nothing, 2, reltol=1e-7, abstol=0)
 
 function RecordMeasurements!(int)
     @unpack params,props_out,part = int.p

@@ -1,4 +1,4 @@
-module UnitfulDierckx
+module UnitfulDierckxInternal
 
 using Unitful
 import Dierckx

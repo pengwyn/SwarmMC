@@ -48,7 +48,7 @@ end
         mkpath(path)
     end
 
-    filename = DanUtils.ClaimNextFilename(prefix)
+    filename = DanUtilsInternal.ClaimNextFilename(prefix)
 
     tempfilename = filename * ".TMPSAVE"
     if mmap
@@ -134,10 +134,10 @@ end
         
         if !force && length(filelist) == 1
             quiet == false && println("Not collecting $prefix: only one file.")
-            if filelist[] != DanUtils.DefaultClaimFileGen(0, prefix)
+            if filelist[] != DanUtilsInternal.DefaultClaimFileGen(0, prefix)
                 quiet == false && println("However, renaming.")
 
-                filename = DanUtils.ClaimNextFilename(prefix)
+                filename = DanUtilsInternal.ClaimNextFilename(prefix)
                 mv(filelist[1], filename, force=true)
             end
 
