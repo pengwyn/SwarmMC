@@ -43,7 +43,8 @@ UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
 
 [compat]
-JLD2 = ">= 0.2"
+#JLD2 = ">= 0.2"
+JLD2 = "0.1"
 DiffEqBase = ">= 6.47"
 
 [extras]

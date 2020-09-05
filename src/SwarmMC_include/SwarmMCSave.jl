@@ -52,10 +52,12 @@ end
 
     tempfilename = filename * ".TMPSAVE"
     if mmap
+        @warn "Using JLD2 v0.1. When bug is fixed in v0.2, should switch to that and IOStream."
         @msgwrap "Saving to $filename" JLD2.@save tempfilename props pdict
     else
         # New style for IOStream
-        @msgwrap "Saving (IOStream) to $filename" JLD2.@save tempfilename {iotype=IOStream} props pdict
+        # @msgwrap "Saving (IOStream) to $filename" JLD2.@save tempfilename {iotype=IOStream} props pdict
+        error("Currently broken because of weird JLD2 error. Need JLD2 v0.2 but that breaks something.")
     end
 
     #mv(tempfilename, filename, remove_destination=true)
@@ -287,6 +289,7 @@ ShouldConvertToDict(::GAS) = true
 ShouldConvertToDict(::PARTTYPE) = true
 ShouldConvertToDict(::COLLFREQ) = true
 ShouldConvertToDict(::MEAS_BIN) = true
+ShouldConvertToDict(::MEAS_QUANT) = true
 
 ShouldConvertToDict(::PARTICLE_INIT_STYLE) = true
 ShouldConvertToDict(::PARTICLE_INIT_VEL_STYLE) = true
