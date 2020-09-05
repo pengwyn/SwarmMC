@@ -1,5 +1,5 @@
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 import BisectInterp
 

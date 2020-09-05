@@ -1,6 +1,6 @@
 module ConstIon
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 function CollFreqs(params, gas, ptype, ion_style, ion_frac)
     elastic =    CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_MAXWELL(4.0u"Å^2" * sqrt(eV)))

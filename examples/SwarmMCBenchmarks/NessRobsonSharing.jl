@@ -1,7 +1,7 @@
 
 module NessRobsonSharing
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 NRCrossSection(eps) = 1u"Å^2"
 

@@ -2,7 +2,7 @@
 module SuperModelSingle
 
 using Generic, Constants
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 SuperModelElastic(eps) = (1. + 5*eps)
 SuperModelInelastic(eps) = 1.

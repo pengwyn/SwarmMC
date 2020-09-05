@@ -1,7 +1,7 @@
 
 module SuperModel
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 SuperModelElastic(eps) = (1u"Å^2" + 5u"Å^2/eV"*eps)
 SuperModelInelastic(eps) = 1u"Å^2"

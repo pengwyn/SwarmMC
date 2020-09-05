@@ -1,7 +1,7 @@
 
 module ReidAniso
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 RiedInelastic(eps) = 0.4*(eps - 0.516eV)*u"Å^2/eV"
 

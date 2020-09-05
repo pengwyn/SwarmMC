@@ -1,7 +1,5 @@
 
-using SwarmMC
-using DanUtils
-
+union!(LOAD_PATH, ["."])
 using ReidAniso
 
 @CheckTurns for model in ['A', 'B', 'C', 'D', nothing], method in [:legendre, :func, :grid]

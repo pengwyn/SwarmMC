@@ -4,7 +4,7 @@ module CoulombPositron
 # Basing this off the values in Bobylev and Potapenko (JCP 246, 123, 2013)
 
 using DanUtils, Constants, Reexport
-@reexport using SwarmMC
+@reexport using Reexport ; @reexport using SwarmMC
 
 function CollFreqs(params, gas, ptype ; ϵ, logL)
     m = ptype.mass

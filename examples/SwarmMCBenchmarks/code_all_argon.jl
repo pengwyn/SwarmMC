@@ -1,5 +1,5 @@
 
-using DanUtils
+union!(LOAD_PATH, ["."])
 using Argon
 
 @CheckTurns for exponent in -4:3, coeff in 1:9

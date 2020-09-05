@@ -1,5 +1,5 @@
 
-using DanUtils
+union!(LOAD_PATH, ["."])
 using Hardsphere
 
 @CheckTurns for Temp in [0., 293.]*u"K",

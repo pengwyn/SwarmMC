@@ -1,7 +1,5 @@
 
-using SwarmMC
-using DanUtils
-
+union!(LOAD_PATH, ["."])
 using NessRobsonSharing
 
 @CheckTurns for E in [300., 500., 800.]*u"Td"

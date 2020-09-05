@@ -1,7 +1,7 @@
 
 module PercusYevick
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 using Dierckx, UnitfulDierckx
 
 using PercusYevickSSF

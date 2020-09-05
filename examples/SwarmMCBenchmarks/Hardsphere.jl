@@ -1,7 +1,7 @@
 
 module Hardsphere
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 function CollFreqs(params, gas, ptype)
     elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_HARDSPHERE(5u"Å^2"))

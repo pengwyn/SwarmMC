@@ -2,7 +2,7 @@
 module BoyleSpacePaper
 
 using Generic, Constants, Reexport
-@reexport using SwarmMC
+@reexport using Reexport ; @reexport using SwarmMC
 using BisectInterp
 using PercusYevickSSF
 

@@ -2,7 +2,7 @@
 module RegionTest
 
 using DanUtils, Constants
-@reexport using SwarmMC
+@reexport using Reexport ; @reexport using SwarmMC
 
 function CollFreqs(params, gas, ptype)
     elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_HARDSPHERE(1.))

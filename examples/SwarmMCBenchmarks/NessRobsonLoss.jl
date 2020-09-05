@@ -1,7 +1,7 @@
 
 module NessRobsonLoss
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 function CollFreqs(params, gas, ptype, lossa, lossp)
     elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_MAXWELL(10u"Å^2*eV^(1/2)"))

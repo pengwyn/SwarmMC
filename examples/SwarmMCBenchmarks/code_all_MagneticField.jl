@@ -1,6 +1,5 @@
 
-using SwarmMC
-
+union!(LOAD_PATH, ["."])
 using MagneticField
 
 #Blist =  (1:9)' .* 10.^(0:4)

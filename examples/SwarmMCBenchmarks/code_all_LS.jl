@@ -1,7 +1,5 @@
 
-using DanUtils
-using Constants
-
+union!(LOAD_PATH, ["."])
 using LucasSaelee
 
 # @CheckTurns for F in [0., 0.25, 0.5, 0.75, 1.0],

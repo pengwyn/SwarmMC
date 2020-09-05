@@ -1,7 +1,7 @@
 
 module PYStepModel
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 using Generic, Constants
 
 function CollFreqs(params, gas, ptype)

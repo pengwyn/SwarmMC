@@ -1,6 +1,5 @@
 
-using DanUtils
-
+union!(LOAD_PATH, ["."])
 using NessRobsonLoss
 
 @CheckTurns for (lossp,alist) = [(0.5, [0,1e-5,1e-4,1e-3,1e-2,1e-1,1,10]*u"Å^2/sqrt(eV)"),

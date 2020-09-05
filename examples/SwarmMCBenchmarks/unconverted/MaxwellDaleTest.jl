@@ -3,7 +3,7 @@ module MaxwellDaleTest
 
 export SetupParams
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 using Constants
 
 function SetupParams(ETd=1., final_time=1e-6)

@@ -1,7 +1,5 @@
 
-using SwarmMC
-using DanUtils
-
+union!(LOAD_PATH, ["."])
 using PercusYevick
 
 @CheckTurns for E in [0.03, 0.3, 3., 10., 30.]*u"Td"

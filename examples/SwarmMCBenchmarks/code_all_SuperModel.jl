@@ -1,6 +1,5 @@
 
-using DanUtils
-
+union!(LOAD_PATH, ["."])
 using SuperModel
 
     #Eprelist = 1.0:0.5:10.0

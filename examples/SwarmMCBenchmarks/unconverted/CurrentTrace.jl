@@ -3,7 +3,7 @@ __precompile__()
 module CurrentTrace
 
 using Generic, Constants, Reexport
-@reexport using SwarmMC
+@reexport using Reexport ; @reexport using SwarmMC
 
 const Temp = 27.
 

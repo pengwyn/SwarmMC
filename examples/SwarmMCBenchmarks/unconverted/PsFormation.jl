@@ -1,7 +1,7 @@
 
 module PsFormation
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 using DanUtils, Constants
 using Kwonly
 

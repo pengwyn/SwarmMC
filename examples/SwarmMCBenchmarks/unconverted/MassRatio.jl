@@ -3,7 +3,7 @@ module MassRatio
 
 export SetupParams
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 using Constants
 
 function SetupParams(Temp, ETd, mratio=1e-4)

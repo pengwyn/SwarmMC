@@ -1,7 +1,7 @@
 
 module Maxwell
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 
 function CollFreqs(params, gas, ptype)
     elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_MAXWELL(5.0u"Å^2*eV^(1/2)"))

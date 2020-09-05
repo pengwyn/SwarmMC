@@ -1,6 +1,6 @@
 module Argon
 
-using SwarmMC
+using Reexport ; @reexport using SwarmMC
 using DelimitedFiles
 
 const Ar_mass = 72820.74916940005amu

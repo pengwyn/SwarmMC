@@ -1,5 +1,5 @@
 
-using DanUtils
+union!(LOAD_PATH, ["."])
 using Maxwell
 
 @CheckTurns for tmtr in [0., 293.]u"K",
