@@ -48,20 +48,14 @@ end
         mkpath(path)
     end
 
-    filename = DanUtilsInternal.ClaimNextFilename(prefix)
+    filename, = DanUtilsInternal.ClaimNextFilename(prefix)
 
     tempfilename = filename * ".TMPSAVE"
     if mmap
         @msgwrap "Saving to $filename" JLD2.@save tempfilename props pdict
     else
-        # FIXME: Change to the new syntax for IOStream
-        @msgwrap "Saving (IOStream) to $filename" begin
-            jldopen(tempfilename, true, true, true, IOStream) do file
-                # write(file, "props_save", props_save)
-                write(file, "props", props)
-                write(file, "pdict", pdict)
-            end
-        end
+        # New style for IOStream
+        @msgwrap "Saving (IOStream) to $filename" JLD2.@save tempfilename {iotype=IOStream} props pdict
     end
 
     #mv(tempfilename, filename, remove_destination=true)
@@ -137,7 +131,7 @@ end
             if filelist[] != DanUtilsInternal.DefaultClaimFileGen(0, prefix)
                 quiet == false && println("However, renaming.")
 
-                filename = DanUtilsInternal.ClaimNextFilename(prefix)
+                filename, = DanUtilsInternal.ClaimNextFilename(prefix)
                 mv(filelist[1], filename, force=true)
             end
 

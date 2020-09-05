@@ -40,6 +40,11 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnitfulAtomic = "a7773ee8-282e-5fa2-be4e-bd808c38a91a"
+DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
+
+[compat]
+JLD2 = ">= 0.2"
+DiffEqBase = ">= 6.47"
 
 [extras]
 NonNegLeastSquares = "b7351bd1-99d9-5c5d-8786-f205a815c4d7"
