@@ -375,7 +375,7 @@ using DataFrames
         end
 
         # Inefficient - can't be bothered fixing for now.
-        as_cols = collect([z...] for z in rows(mat))
+        as_cols = collect([z...] for z in eachrow(mat))
         df = DataFrame(as_cols, names) 
     else
         return mat

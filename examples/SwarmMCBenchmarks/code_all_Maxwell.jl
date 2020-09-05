@@ -1,8 +1,8 @@
 
-union!(LOAD_PATH, ["."])
-using Maxwell
+include("Maxwell.jl")
+using .Maxwell
 
-@CheckTurns for tmtr in [0., 293.]u"K",
+@CheckTurns for tmtr in [nothing, 293u"K"],
                 ETd in [nothing ; [1., 0.1, 10.]u"Td"]
 
     tmtr == 0. && ETd == nothing && continue

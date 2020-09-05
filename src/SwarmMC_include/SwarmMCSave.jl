@@ -42,6 +42,7 @@ end
     in_params = Finalise(in_params)
 
     pdict = ConvertToDict(in_params)
+    props_dict = ConvertToDict(props)
 
     path = dirname(prefix)
     if path != "" && !ispath(path)
@@ -52,12 +53,12 @@ end
 
     tempfilename = filename * ".TMPSAVE"
     if mmap
-        @warn "Using JLD2 v0.1. When bug is fixed in v0.2, should switch to that and IOStream."
-        @msgwrap "Saving to $filename" JLD2.@save tempfilename props pdict
+        # @warn "Using JLD2 v0.1. When bug is fixed in v0.2, should switch to that and IOStream."
+        @msgwrap "Saving to $filename" JLD2.@save tempfilename props_dict pdict
     else
         # New style for IOStream
-        # @msgwrap "Saving (IOStream) to $filename" JLD2.@save tempfilename {iotype=IOStream} props pdict
-        error("Currently broken because of weird JLD2 error. Need JLD2 v0.2 but that breaks something.")
+        @msgwrap "Saving (IOStream) to $filename" JLD2.@save tempfilename {iotype=IOStream} props_dict pdict
+        # error("Currently broken because of weird JLD2 error. Need JLD2 v0.2 but that breaks something.")
     end
 
     #mv(tempfilename, filename, remove_destination=true)
@@ -184,7 +185,7 @@ struct NoValidFiles <: Exception
 end
 
 ReadAll(params::PARAMS; kwds...) = ReadAll(SavePrefix(params); kwds...)
-@xport function ReadAll(prefix::String; quiet=false, print_dots=false, move_bad_out=false, keep_on_error=true)
+@xport function ReadAll(prefix::String; quiet=false, print_dots=false, move_bad_out=false, keep_on_error=true, ignore_exc=true)
     filelist = glob(prefix * "__*.jld2")
 
     quiet == false && println("Found $(length(filelist)) files.")
@@ -223,10 +224,11 @@ ReadAll(params::PARAMS; kwds...) = ReadAll(SavePrefix(params); kwds...)
         try
             if params == nothing
                 pdict = load(filename, "pdict")
-                params = ParseFromDict(pdict, keep_on_error)
+                params = ParseFromDict(pdict, keep_on_error ; eval_module=SwarmMC)
             end
 
-            thisprops = load(filename, "props")
+            props_dict = load(filename, "props_dict")
+            thisprops = ParseFromDict(props_dict, keep_on_error ; eval_module=SwarmMC)
 
             if props == nothing
                 props = thisprops
@@ -239,7 +241,7 @@ ReadAll(params::PARAMS; kwds...) = ReadAll(SavePrefix(params); kwds...)
                 end
             end
         catch exc
-            if isa(exc, JLD2.InvalidDataException) || isa(exc, JLD2.UnsupportedVersionException) || isa(exc, FileIO.UnknownFormat) || isa(exc, MethodError) || isa(exc, EOFError)
+            if ignore_exc && ( isa(exc, JLD2.InvalidDataException) || isa(exc, JLD2.UnsupportedVersionException) || isa(exc, FileIO.UnknownFormat) || isa(exc, MethodError) || isa(exc, EOFError))
                 if move_bad_out
                     println("Got exception $exc - moving $filename to '$(bad_dir)'.")
                     if !ispath(bad_dir)
@@ -290,6 +292,10 @@ ShouldConvertToDict(::PARTTYPE) = true
 ShouldConvertToDict(::COLLFREQ) = true
 ShouldConvertToDict(::MEAS_BIN) = true
 ShouldConvertToDict(::MEAS_QUANT) = true
+ShouldConvertToDict(::MEAS_LOG2) = true
+ShouldConvertToDict(::Type{<:MEAS_BIN}) = true
+ShouldConvertToDict(::Type{<:MEAS_LOG2}) = true
+ShouldConvertToDict(::Type{<:PARAMS}) = true
 
 ShouldConvertToDict(::PARTICLE_INIT_STYLE) = true
 ShouldConvertToDict(::PARTICLE_INIT_VEL_STYLE) = true
