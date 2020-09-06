@@ -34,7 +34,7 @@ end
     p.t_grid = LogRange(1e5, 1e9, 101, prefactor=p.time_unit, as_val=true)
     p.max_substepsize = 1e7*p.time_unit
 
-    p.ionisation_as_weight = TypeBool(ion_weight)
+    p.ionisation_as_weight = ion_weight
 
     p.meas_bins = (MEAS_BIN(:cum, :t), MEAS_BIN(:t))
 

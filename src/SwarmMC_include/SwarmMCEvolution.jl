@@ -397,7 +397,7 @@ function SetupIntegrator(params)
             push!(bin_callbacks, callback)
         end
     end
-    cb = CallbackSet(CollisionCallback, bin_callbacks...)
+    cb = CallbackSet(CollisionCallback, bin_callbacks..., params.user_callbacks...)
 
     int = OrdinaryDiffEq.init(prob,
                               # Need Tsit5 for magnetic fields... it's still not

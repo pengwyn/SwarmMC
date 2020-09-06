@@ -447,6 +447,7 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
     z_grid::AUTO <: AbstractVector{Q(uL)} = Q(uL)[]
     r_grid::AUTO <: AbstractVector{Q(uL)} = Q(uL)[]
 
+    # Internal use only
     eps_bin_grid::AUTO <: AbstractVector{Q(uE)} = Q(uE)[]
     z_bin_grid::AUTO <: AbstractVector{Q(uL)} = Q(uL)[]
     r_bin_grid::AUTO <: AbstractVector{Q(uL)} = Q(uL)[]
@@ -455,7 +456,9 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
     meas_bins::AUTO <: Tuple{Vararg{MEAS_BIN}} = (MEAS_BIN(:t,:cum),)
     meas_quants::AUTO <: Tuple{Vararg{MEAS_QUANT}} = Q_basic_list
 
+    # Internal use only
     has_cum_meas::AUTO = nothing
+
     meas_num_l::Int = 0
 
     steady_state_timefrac::Float64 = 0.5
@@ -466,6 +469,7 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
 
     gen_cf::Function = (params, gas, ptype) -> []
 
+    # Internal use only
     cf_matrix::AUTO = nothing
     cf_list::AUTO = nothing
 
@@ -498,6 +502,8 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
     show_events::AUTO <: TypeBool = TypeFalse()
 
     handle_temperature_bias::Bool = true
+
+    user_callbacks::AUTO = []
 
     finalised::Bool = false
 end
