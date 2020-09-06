@@ -658,7 +658,7 @@ wFromT(mass, tmtr) = sqrt(2*kB*tmtr / mass)
 
 function EpsBin(eps, eps_bin_grid, cur_bin=1)
     # Short circuit check - as this is the most common from Collision()
-    if eps_bin_grid[cur_bin] < eps < eps_bin_grid[cur_bin+1]
+    if cur_bin > 0 && eps_bin_grid[cur_bin] < eps < eps_bin_grid[cur_bin+1]
         return cur_bin
     else
         ind = BisectInterpInternal.BisectInsert(eps, eps_bin_grid)
