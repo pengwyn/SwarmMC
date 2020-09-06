@@ -1,6 +1,6 @@
 
-union!(LOAD_PATH, ["."])
-using NessRobsonSharing
+include("NessRobsonSharing.jl")
+using .NessRobsonSharing
 
 @CheckTurns for E in [300., 500., 800.]*u"Td"
         for S in [-1., 0., 1/4., 1/3., 1/2.]

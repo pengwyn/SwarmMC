@@ -1,6 +1,6 @@
 
-union!(LOAD_PATH, ["."])
-using Argon
+include("Argon.jl")
+using .Argon
 
 @CheckTurns for exponent in -4:3, coeff in 1:9
 # @CheckTurns for exponent in [-1], coeff in [1]

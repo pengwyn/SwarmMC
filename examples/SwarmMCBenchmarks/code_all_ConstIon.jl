@@ -1,6 +1,6 @@
 
-union!(LOAD_PATH, ["."])
-using ConstIon
+include("ConstIon.jl")
+using .ConstIon
 
 @CheckTurns for gns in [GNS_UPDATE_LOG2FAC(), GNS_NOTHING(), GNS_REGEN_ALL(), GNS_DOUBLE()],
                 ionweight in [true,false],

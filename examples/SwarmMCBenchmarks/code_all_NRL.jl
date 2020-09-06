@@ -1,6 +1,6 @@
 
-union!(LOAD_PATH, ["."])
-using NessRobsonLoss
+include("NessRobsonLoss.jl")
+using .NessRobsonLoss
 
 @CheckTurns for (lossp,alist) = [(0.5, [0,1e-5,1e-4,1e-3,1e-2,1e-1,1,10]*u"Å^2/sqrt(eV)"),
                       (-0.5, [0,1e-5,1e-2,1]*u"Å^2*sqrt(eV)"),
@@ -9,12 +9,12 @@ using NessRobsonLoss
         # tmtr = 0.
         tmtr = 293.0u"K"
 
-		ans = ANS_NOTHING()
-		gns = GNS_REGEN_ALL()
+		ans_style = ANS_NOTHING()
+		gns_style = GNS_REGEN_ALL()
 		weight_reduction = 0.5
 
-		# ans = ANS_NOTHING()
-		# gns = GNS_DOUBLE()
+		# ans_style = ANS_NOTHING()
+		# gns_style = GNS_DOUBLE()
 		# weight_reduction = 1.0
 
 		num_part = 100
@@ -22,7 +22,7 @@ using NessRobsonLoss
 
         @show lossp, lossa
 
-        p = SetupParams(; lossa, lossp, ans, gns, weight_reduction,
+        p = SetupParams(; lossa, lossp, ans_style, gns_style, weight_reduction,
                         # split_fake,
                         tmtr)
         p.save_name = p.save_name * ":N=$(num_part)"

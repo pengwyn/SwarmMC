@@ -1,6 +1,7 @@
 
-union!(LOAD_PATH, ["."])
-using ReidAniso
+using ForwardDiff, NonNegLeastSquares
+include("ReidAniso.jl")
+using .ReidAniso
 
 @CheckTurns for model in ['A', 'B', 'C', 'D', nothing], method in [:legendre, :func, :grid]
     model == nothing && (method == :func || continue)
