@@ -16,8 +16,10 @@ import DataStructures: OrderedDict
     tavg = RunningAvg(times)
     diffweights = RunningAvg(weights)
 
-    if steady_state
+    if steady_state == true
         ind = findfirst(t -> t > params.steady_state_timefrac * times[end], times)
+    elseif steady_state isa Number
+        ind = findfirst(t -> t > steady_state * times[end], times)
     else
         ind = 1
     end

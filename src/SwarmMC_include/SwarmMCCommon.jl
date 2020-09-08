@@ -379,45 +379,6 @@ Base.copy(x::PARTICLE) = GenericCopy(x)
 
 
 ################################################################################
-# ** GRID
-
-# @TypeEnumExport GRID_STYLE GRID_LINEAR GRID_LOG GRID_ARRAY GRID_EMPTY
-
-# @xport struct GRID{E, T <: AbstractVector{E}} <: AbstractVector{E}
-#     style::GRID_STYLE
-
-#     grid::T
-# end
-
-# GRID(style, grid::T) where {T} = GRID{eltype(T),T}(style, grid)
-
-# import Base: getindex, length, size, show, lastindex
-# Base.getindex(x::GRID, ind) = x.grid[ind]
-# for name in [:length, :size, :lastindex]
-#     @eval Base.$name(x::GRID) = $name(x.grid)
-# end
-
-# Base.show(io::IO, mime::MIME"text/plain", x::GRID) = print(io, string(typeof(x)) * " with " * string(length(x.grid)) * " elements")
-
-# # Base.length(x::GRID) = length(x.grid)
-# # Base.size(x::GRID) = size(x.grid)
-# # Base.endof(x::GRID) = endof(x.grid)
-# GRID(style::GRID_LINEAR, min::Number, max::Number, num::Int=101) = GRID(style, linspace(min,max,num))
-# GRID(style::GRID_LOG, min::Number, max::Number, num::Int=101) = GRID(style, 10 .^ linspace(log10(min), log10(max), num))
-# GRID(style::GRID_LOG, max::Number) = GRID(style, max*1e-5, max)
-# GRID(style::GRID_LOG, min::Quantity{T1,D,U}, max::Quantity{T2,D,U}, num::Int=101) where {T1,T2,D,U} = GRID(style, 10 .^ linspace(log10(ustrip(min)), log10(ustrip(max)), num) .* unit(min))
-# #GRID(style::GRID_ARRAY, vals::Vector{Float64}) = GRID(style, vals)
-# GRID(style::GRID_EMPTY) = GRID(GRID_EMPTY(), Vector{Float64}())
-# # Defaults
-# GRID(min::Number, max::Number, num::Int) = GRID(GRID_LINEAR(), min, max, num)
-# GRID(max::Number) = GRID(zero(max), max, 101)
-# GRID(vals::Vector{<:Number}) = GRID(GRID_ARRAY(), vals)
-# GRID() = GRID(GRID_EMPTY())
-
-
-
-
-################################################################################
 # ** PARAMS
 
 abstract type PARTICLE_INIT_STYLE end

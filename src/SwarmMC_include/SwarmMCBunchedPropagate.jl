@@ -1,25 +1,22 @@
 # This is the wrapper to finalise the params
-@xport BunchedPropagate(params, N, verbose=TypeTrue() ; kwds...) = BunchedPropagateInternal(Finalise(params), N, verbose; kwds...)
-function BunchedPropagateInternal(params, N, verbose=TypeTrue() ; return_part_list=TypeFalse())
+@xport function BunchedPropagate(params, N, verbose=TypeTrue() ; kwds...)
+    params = Finalise(params)
+    int = SetupIntegrator(params)
+    BunchedPropagateInternal(params, N, int, verbose; kwds...)
+end
+    
+function BunchedPropagateInternal(params, N, int, verbose=TypeTrue() ; return_part_list=TypeFalse())
     props_out = PROPS_OUT(params, N*uN)
     walltime_start = time()
-    
-    int = SetupIntegrator(params)
 
     part_list = [GenerateInitParticle(params.init_style, params) for i in 1:N]
+    todo_list = eltype(part_list)[]
+
     if IsTrue(return_part_list)
         init_part_list = deepcopy(part_list)
     end
 
-    # For debugging/early failure
-    num_redos_fakenoncons = 0
-
     for step_ind in 0:length(params.t_grid)-1
-        if isempty(part_list)
-            @warn "Exiting because of empty part_list - this shouldn't happen anymore"
-            break
-        end
-
         if step_ind == 0
             binstart = minimum(x -> x.time, part_list)
             binend = params.t_grid[1]
@@ -32,32 +29,94 @@ function BunchedPropagateInternal(params, N, verbose=TypeTrue() ; return_part_li
 
         timestep = binend - binstart
 
-        if IsTrue(verbose) && @printagain(10)
-            timepercentage = binstart / params.t_grid[end] * 100
-            print("Timestep $step_ind/$(length(params.t_grid)-1) ($(round(timepercentage,sigdigits=3))%) ")
-        end
-
         setfield!.(part_list, :t_bin, step_ind)
 
-        abort = false
-        recommendation,new_list = BunchedOneStep(int, params, N, part_list, binstart, timestep, props_out, verbose=verbose)
+        cur_time = binstart
+        # end_time = start_time + timestep
+        num_substeps = max(1, ceil(Int, timestep / params.max_substepsize))
 
-        part_list = new_list
+        for substep_ind in 1:num_substeps
+            isempty(part_list) && @goto endofloops
 
-        if recommendation == :double_substeps
-            error("Not allowing this any more")
-        elseif recommendation == :finished
-            abort = true
-        elseif recommendation == :success
-        else
-            error("Unknown recommendation $recommendation.")
+            if IsTrue(verbose) && @printagain(10)
+                timepercentage = cur_time / params.t_grid[end] * 100
+                if any(isfinite.([EpsFromVel(x) for x in part_list]))
+                    avgeps = mean(x for x in EpsFromVel.(part_list) if isfinite(x))
+                else
+                    avgeps = -1.
+                end
+
+                avgvz = mean(x.vel[3] for x in part_list)
+                avgz = mean(x.pos[3] for x in part_list)
+                totweight = sum(x.weight*exp2(x.log2fac) for x in part_list)
+                if totweight == 0.0uN
+                    totweight = "≈2^" * string(sum(x.log2fac for x in part_list))
+                else
+                    totweight = round(totweight,sigdigits=3)
+                end
+                println("Timestep $step_ind/$(length(params.t_grid)-1) ($(round(timepercentage,sigdigits=3))%) Substep: ($substep_ind/$num_substeps). Mean eps: $(round(avgeps,sigdigits=3)). Mean z: $(round(avgz,sigdigits=3)). Tot weight: $totweight")
+            end
+
+            substep_end_time = min(cur_time + params.max_substepsize, binend)
+            orig_N = length(part_list)
+            todo_list,part_list = part_list,todo_list
+
+            @assert isempty(part_list)
+
+            count_seen = 0
+            while !isempty(todo_list)
+                if IsTrue(verbose) && @printagain(10)
+                    println("Particles to go $(length(todo_list))/$(orig_N).")
+                end
+
+                part = pop!(todo_list)
+                extra_list = GoToTime(int, params, part, props_out, substep_end_time)
+                
+                if part.weight > 0uN
+                    push!(part_list, part)
+                    count_seen += 1
+                end
+
+                append!(todo_list, extra_list)
+
+                if count_seen > params.runaway_threshold*N
+                    @error "Runaway number of particles!" count_seen N orig_N
+                    error("Runaway number of particles")
+                end
+            end
+
+            @assert all(x->x.weight > 0uN, part_list)
+
+            ratio = length(part_list) / orig_N
+
+            if ratio < 0.1 || length(part_list) == 0
+                if params.adapt_noncons_style == ANS_NOTHING()
+                    if length(new_list) == 0
+                        @info "Out of particles with no adapt style."
+                        @goto endofloops
+                    end
+                else
+                    error("Can't continue without particles")
+                end
+            end
+
+            cur_time = substep_end_time
+
+            part_list = GenerateNextStep(params.generate_next_step_style, part_list, N)
         end
 
-        if abort
-            break
-        end
+        # Instantaneous measurements
+        for part in part_list
+            # bins = (part.t_bin, part.r_bin, part.z_bin, part.eps_bin, 0)
+            steady_state = part.time > params.t_grid[end]*params.steady_state_timefrac
 
+            for meas in props_out.meas
+                UpdateMeasInst!(meas, part, steady_state)
+            end
+        end
     end
+
+    @label endofloops
 
     props_out.walltime = (time() - walltime_start) * u"s"
 
@@ -67,123 +126,6 @@ function BunchedPropagateInternal(params, N, verbose=TypeTrue() ; return_part_li
         return props_out
     end
 end
-
-function BunchedOneStep(int, params, target_N, part_list, start_time, timestep, props_out ; verbose=TypeTrue()::TypeBool)
-    cur_time = start_time
-    end_time = start_time + timestep
-    num_substeps = max(1, ceil(Int, timestep / params.max_substepsize))
-
-
-    for substep_ind in 1:num_substeps
-        if isempty(part_list)
-            break
-        end
-
-        if IsTrue(verbose) && @printagain(10)
-            if any(isfinite.([EpsFromVel(x) for x in part_list]))
-                avgeps = mean(x for x in EpsFromVel.(part_list) if isfinite(x))
-            else
-                avgeps = -1.
-            end
-
-            avgvz = mean(x.vel[3] for x in part_list)
-            avgz = mean(x.pos[3] for x in part_list)
-            totweight = sum(x.weight*exp2(x.log2fac) for x in part_list)
-            if totweight == 0.0uN
-                totweight = "≈2^" * string(sum(x.log2fac for x in part_list))
-            else
-                totweight = round(totweight,sigdigits=3)
-            end
-            println("Substep: ($substep_ind/$num_substeps). Mean eps: $(round(avgeps,sigdigits=3)). Mean z: $(round(avgz,sigdigits=3)). Tot weight: $totweight")
-        end
-
-        substep_end_time = min(cur_time + params.max_substepsize, end_time)
-        todo_list = copy.(part_list)
-        result,new_list = BunchedSubStep(int, params, target_N, todo_list, substep_end_time, props_out, verbose=verbose)
-
-        before_cull = new_list
-        new_list = filter(x->x.weight > 0uN, new_list)
-
-        ratio = length(new_list) / length(part_list)
-
-        if result == :got_too_many
-            if params.adapt_noncons_style == ANS_NOTHING()
-                error("No way to adapt for too many particles with $(params.adapt_noncons_style).")
-            elseif params.adapt_noncons_style == ANS_FAKE_NONCONS()
-                error("Not implemented")
-            else
-                error("Unknown ANS")
-            end
-        elseif result != :success
-            error("Unknown result $result")
-        end
-
-        if ratio < 0.1 || length(new_list) == 0
-            if params.adapt_noncons_style == ANS_NOTHING()
-                if length(new_list) == 0
-                    @debug "Out of particles with no adapt style."
-                    return :finished,new_list
-                end
-                # Otherwise just keep going
-            elseif params.adapt_noncons_style == ANS_FAKE_NONCONS()
-                error("Not implemented")
-            else
-                error("Unknown ANS")
-            end
-        end
-
-        cur_time = substep_end_time
-
-        if length(new_list) == 0
-            @show length(part_list)
-        end
-
-        before_N = length(new_list)
-        part_list = GenerateNextStep(params.generate_next_step_style, new_list, target_N)
-        after_N = length(part_list)
-    end
-
-    for part in part_list
-        # bins = (part.t_bin, part.r_bin, part.z_bin, part.eps_bin, 0)
-        steady_state = part.time > params.t_grid[end]*params.steady_state_timefrac
-
-        for meas in props_out.meas
-            UpdateMeasInst!(meas, part, steady_state)
-        end
-    end
-
-    return :success,part_list
-end
-
-function BunchedSubStep(int, params, target_N, todo_list, target_time, props_out ; verbose=TypeTrue()::TypeBool)
-    new_list = PARTICLE[]
-    init_todo_N = length(todo_list)
-
-    count_alive = 0
-    while !isempty(todo_list)
-        if IsTrue(verbose) && @printagain(10)
-            println("Particles to go $(length(todo_list))/$(init_todo_N).")
-        end
-
-        part = pop!(todo_list)
-        extra_list = GoToTime(int, params, part, props_out, target_time)
-            
-        if part.weight > 0uN
-            push!(new_list, part)
-            count_alive += 1
-        end
-
-        append!(todo_list, extra_list)
-
-        if count_alive > params.runaway_threshold*target_N
-            @info "Runaway number of particles!" count_alive target_N init_todo_N
-            # Return new_list anyway just in case it helps
-            return :got_too_many,new_list
-        end
-    end
-    return :success,new_list
-end
-
 
 ######################################
 # * GenerateNextStep
