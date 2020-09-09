@@ -236,7 +236,7 @@ function CollisionAffect!(int)
     # Forcing the integrator to forget about the event having already been triggered.
     int.event_last_time = 0
 end
-const CollisionCallback = ContinuousCallback(CollisionCond, CollisionAffect!, nothing, abstol=0.0, reltol=0.0, interp_points=0)
+const CollisionCallback = ContinuousCallback(CollisionCond, CollisionAffect!, nothing, interp_points=0)
 
 ##################
 function EpsBinCondition(out,u,t,int)
@@ -286,7 +286,6 @@ function EpsBinAffect!(int, indx)
                  int.callback_cache)
 end
 const EpsBinCallback = VectorContinuousCallback(EpsBinCondition, EpsBinAffect!, nothing, 2)
-# const EpsBinCallback = VectorContinuousCallback(EpsBinCondition, EpsBinAffect!, 2, reltol=1e-7, abstol=0, interp_points=0)
 
 function ZBinCondition(out,u,t,int)
     @unpack pos = UnpackVector(u)
@@ -313,7 +312,7 @@ function ZBinAffect!(int, indx)
         int.vector_event_last_time = 1
     end
 end
-const ZBinCallback = VectorContinuousCallback(ZBinCondition, ZBinAffect!, nothing, 2, reltol=1e-7, abstol=0)
+const ZBinCallback = VectorContinuousCallback(ZBinCondition, ZBinAffect!, nothing, 2)
 
 function RBinCondition(out,u,t,int)
     @unpack pos = UnpackVector(u)
@@ -341,7 +340,7 @@ function RBinAffect!(int, indx)
         int.vector_event_last_time = 1
     end
 end
-const RBinCallback = VectorContinuousCallback(RBinCondition, RBinAffect!, nothing, 2, reltol=1e-7, abstol=0)
+const RBinCallback = VectorContinuousCallback(RBinCondition, RBinAffect!, nothing, 2)
 
 function RecordMeasurements!(int)
     @unpack params,props_out,part = int.p
@@ -429,6 +428,8 @@ function ReinitIntegrator!(int, part, props_out, time_final)
     reinit!(int, u0,
             t0=ustrip(uT,part.time),
             tf=ustrip(uT,time_final))
+    # TODO: Maybe submit a bug for this
+    int.event_last_time = 0
 end
 
 function DoSolve(int, part)
@@ -535,7 +536,7 @@ end
 ##############################
 # * Other
 #----------------------------
-function RecordEvent!(params, event_type ; extras...)
+@inline function RecordEvent!(params, event_type ; extras...)
     if IsTrue(params.do_event_meas)
         params.event_counts[event_type] += 1
     end

@@ -19,7 +19,7 @@ end
     @show zstar
 
     z_final = 300 * zstar
-    p.z_grid = LinRange(0u"Å", z_final, 101) .- 1e3Å
+    p.z_grid = LinRange(0u"Å", z_final, 101)
 
     tanh_mid = 100. * zstar
     tanh_spread = 25. * zstar
@@ -27,8 +27,8 @@ end
     ρ_func(pos) = ρ_left + (ρ_right - ρ_left)/2 * (1 + tanh(2*(pos[3] - tanh_mid) / tanh_spread))
 
     # p.E_field = EFromETd(1Td,ρ_func,SwarmMC.XYZ([0,0,1]))
-    p.E_field = EFromETd(1Td,ρ_left) * [0,0,1]
-    # p.E_field = EFromETd(1Td,ρ_right) * [0,0,1]
+    # p.E_field = EFromETd(1Td,ρ_left) * [0,0,1]
+    p.E_field = EFromETd(1Td,ρ_right) * [0,0,1]
     
     m0 = 4*amu
 
@@ -45,8 +45,8 @@ end
     
     p.meas_bins = (MEAS_BIN(:cum,:t), MEAS_BIN(:cum,:z))
 
-    p.t_grid = LinRange(0,5e11,10001) * p.time_unit
-    # p.t_grid = LinRange(0,5e1,10001) * p.time_unit
+    p.t_grid = LinRange(0,5e11,101) * p.time_unit
+    # p.t_grid = LinRange(0,5e1,101) * p.time_unit
     
     p.save_name = MakeSaveName("DaleTanh")
 
