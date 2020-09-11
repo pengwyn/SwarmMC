@@ -325,7 +325,7 @@ end
 
 
 """
-CreateCollFreq(params, gas, ptype,
+`CreateCollFreq(params, gas, ptype,
                name,
                colltype::CF_STYLE_ENUM, 
                gencf::GENCF_PARAMS
@@ -333,7 +333,7 @@ CreateCollFreq(params, gas, ptype,
                threshold=0.0uE,
                ion_sharing_style=ISS_AFE(),
                ion_sharing_ratio=0.5,
-               is_cross_section=true)
+               is_cross_section=true)`
                
 Generate a `COLLFREQ` object, should be used for creating the list to be given
 to `gen_cf` of the params object.

@@ -50,7 +50,7 @@ Base.convert(::Type{Union{Function,T}}, x::T2) where {T<:Number, T2<:Number} = c
 # ** Measurements
 
 """
-MEAS_BIN
+`MEAS_BIN([:cum][,:ss][,:t][,:r][,:z][,:eps][,:costh])`
     
 Define the times, positions or energies in which measurements are to be divided
 into. It also selects whether measurements should be cumulative or
@@ -138,17 +138,20 @@ end
 #----------------------------
 
 """
-MEAS_QUANT
+`MEAS_QUANT(label::Symbol, unit, kind::Type=Float64)`
 
 References the quantity that is measured and will be placed into `MEAS_BIN`.
-A quantity defined this way should then extend `InstMeas` to implement the
+A quantity defined this way should then extend `InstMeas` using `label` to implement the
 measure itself.
+
+The storage of this quantity is defined by `unit` and `kind`. `kind` can be
+`Float64` or `XYZ`.
 """
 struct MEAS_QUANT{label, unit, kind} end
 MEAS_QUANT(label, unit, kind=Float64) = MEAS_QUANT{label,unit,kind}()
 
 """
-InstValue(::Val{sym}, weight, log2fac, pos, vel, eps)
+`InstValue(::Val{sym}, weight, log2fac, pos, vel, eps)`
 
 The value of the quantity (`sym`) being measured, given the current particle
 properties are `pos`, `vel`, `eps` and the particle's weight is given by
@@ -157,7 +160,7 @@ properties are `pos`, `vel`, `eps` and the particle's weight is given by
 InstValue(::Val{T}, weight, log2fac, pos, vel, eps) where T = error("InstValue not defined for quantity $T.")
 
 """
-Log2Fac(::Val{sym}, log2fac)
+`Log2Fac(::Val{sym}, log2fac)`
 
 What log2fac should be assigned to this quantity. Only relevant for measurements
 that are considering the weights.
@@ -215,10 +218,13 @@ end
 # * PROPS_OUT
 
 """
-PROPS_OUT
+`PROPS_OUT`
 
 Structure to store measurements taken during a simulation. This struct supports
 convenient querying of different quantities for different bins.
+
+The user should not need to manually create or populate this, but will need to
+query it to obtain results.
 """
 @xport @AutoParm mutable struct PROPS_OUT
     meas::Array{MEAS_LOG2,3}
@@ -248,7 +254,7 @@ const last_gas_ind = Ref(0)
 NextGasInd() = (last_gas_ind[] += 1)
 
 """
-GAS(; name::Symbol=:gas, m0, ρ, tmtr)
+`GAS(; name::Symbol=:gas, m0, ρ, tmtr)`
 
 The definition of a gas. The temperature `tmtr` defaults to zero, which itself
 must be specified as `nothing`.
@@ -282,7 +288,7 @@ NextPTypeInd() = (last_ptype_ind[] += 1)
 #                         T_DELAY_EVENT}
 
 """
-PARTTYPE(;name=:particle, mass=1mₑ, charge=1q)
+`PARTTYPE(;name=:particle, mass=1mₑ, charge=1q)`
 
 The definition of the type of particle, giving a mass and charge.
 """
@@ -310,7 +316,7 @@ struct CFS_INELASTIC <: CFS_INELASTIC_ABSTRACT end
 struct CFS_INELASTIC_MANUAL_DEGEN <: CFS_INELASTIC_ABSTRACT end
 
 @doc """
-CF_STYLE_ENUM
+`CF_STYLE_ENUM`
 
 The type of collision frequency process.
 
@@ -333,7 +339,7 @@ The types that might need some more explanation are:
 end
 
 @doc """
-ISS_ENUM
+`ISS_ENUM`
 
 Options for ionisation energy sharing
 
@@ -414,7 +420,7 @@ abstract type PARTICLE_INIT_TIME_STYLE end
 @TypeEnumExport GNS_ENUM GNS_DOUBLE GNS_REGEN_ALL GNS_NOTHING GNS_UPDATE_LOG2FAC
 
 @doc """
-GNS_ENUM
+`GNS_ENUM`
 
 The style for generating or removing particles for the next time bin.
 
@@ -431,7 +437,7 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
 
 
 """
-PARAMS(; kwds...)
+`PARAMS(; kwds...)`
 
 The main parameters object. The parameters can be set as keywords or by mutating
 the structure afterwards. When finished setting the parameters, call
@@ -558,67 +564,67 @@ Base.broadcastable(x::PARAMS) = Ref(x)
 
 # Annoying with all the finalisation in here, but very convenient otherwise.
 """
-TGrid(params)
+`TGrid(params)`
 
 Return the midpoint of all time bins, which is the value relevant for cumulative measurements.
 """
 @xport TGrid(params::PARAMS) = RunningAvg(Finalise(params).t_grid)
 """
-TInstGrid(params)
+`TInstGrid(params)`
 
 Return the points at which instantaneous measurements correspond to.
 """
 @xport TInstGrid(params::PARAMS) = Finalise(params).t_grid[begin+1:end]
 """
-ΔT(params)
+`ΔT(params)`
 
 Return the size of the cumulative time measurement bins.
 """
 @xport ΔT(params::PARAMS) = diff(Finalise(params).t_grid)
 """
-RGrid(params)
+`RGrid(params)`
 
 Return the midpoint of the radial measurement bins.
 """
 @xport RGrid(params::PARAMS) = RunningAvg(Finalise(params).r_bin_grid)
 """
-ΔR(params)
+`ΔR(params)`
 
 Return the size of the radial measurement bins.
 """
 @xport ΔR(params::PARAMS) = diff(Finalise(params).r_bin_grid)
 """
-ZGrid(params)
+`ZGrid(params)`
 
 Return the midpoint of the spatial z measurement bins.
 """
 @xport ZGrid(params::PARAMS) = RunningAvg(Finalise(params).z_bin_grid)
 """
-ΔZ(params)
+`ΔZ(params)`
 
 Return the size of the spatial z measurement bins.
 """
 @xport ΔZ(params::PARAMS) = diff(Finalise(params).z_bin_grid)
 """
-EpsGrid(params)
+`EpsGrid(params)`
 
 Return the midpoint of the energy measurement bins.
 """
 @xport EpsGrid(params::PARAMS) = RunningAvg(Finalise(params).eps_bin_grid)
 """
-ΔEps(params)
+`ΔEps(params)`
 
 Return the size of the energy measurement bins.
 """
 @xport ΔEps(params::PARAMS) = diff(Finalise(params).eps_bin_grid)
 """
-CosthGrid(params)
+`CosthGrid(params)`
 
 Return the midpoint of the costheta measurement bins.
 """
 @xport CosthGrid(params::PARAMS) = RunningAvg(Finalise(params).costh_bin_grid)
 """
-ΔCosth(params)
+`ΔCosth(params)`
 
 Return the size of the costheta measurement bins.
 """
@@ -717,9 +723,9 @@ end
 # ** Simple maths
 
 """
-EpsFromVel(vel, mass)
+`EpsFromVel(vel, mass)
 EpsFromVel(vel, ::PARTTYPE)
-EpsFromVel(::PARTICLE)
+EpsFromVel(::PARTICLE)`
 
 Calculate the energy of a particle from the velocity and mass.
 """

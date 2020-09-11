@@ -4,7 +4,7 @@ using Match
 import DataStructures: OrderedDict
 
 """
-Quants(params, props ; mbin, SI=true, n0_factors=false, include_errors=true)
+`Quants(params, props ; mbin, SI=true, n0_factors=false, include_errors=true)`
 
 Generate a dictionary of commonly used transport quantities from time averages
 in `props`. The type of measurement bin can be selected in `mbin`, although it
@@ -258,7 +258,7 @@ end
 using DataFrames
 
 """
-GetAll(names... ; kwds...)
+`GetAll(names... ; kwds...)`
 
 Read all sets of results in the current directory, extracting quantities given
 by `names`. Each name can be either:

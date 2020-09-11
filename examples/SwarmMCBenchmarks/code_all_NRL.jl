@@ -9,11 +9,9 @@ using .NessRobsonLoss
         # tmtr = 0.
         tmtr = 293.0u"K"
 
-		ans_style = ANS_NOTHING()
 		gns_style = GNS_REGEN_ALL()
 		weight_reduction = 0.5
 
-		# ans_style = ANS_NOTHING()
 		# gns_style = GNS_DOUBLE()
 		# weight_reduction = 1.0
 
@@ -22,7 +20,7 @@ using .NessRobsonLoss
 
         @show lossp, lossa
 
-        p = SetupParams(; lossa, lossp, ans_style, gns_style, weight_reduction,
+        p = SetupParams(; lossa, lossp, gns_style, weight_reduction,
                         # split_fake,
                         tmtr)
         p.save_name = p.save_name * ":N=$(num_part)"

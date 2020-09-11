@@ -1,6 +1,6 @@
 
 """
-BunchedPropagate(params, N ; return_part_list=false)
+`BunchedPropagate(params, N ; return_part_list=false)`
 
 Run a simulation of `N` particles using `params`. Returns a `PROPS_OUT` object.
 
@@ -269,7 +269,7 @@ function SetupParallelBunchedPropagate(p)
 end
 
 """
-LoopMaxTime(params, N ; walltime=:auto)
+`LoopMaxTime(params, N ; walltime=:auto)`
 
 Runs simulations repeatedly until `walltime` (a `Unitful` quantity) is reached.
 

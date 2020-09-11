@@ -1,6 +1,6 @@
 
 """
-Finalise(params)
+`Finalise(params)`
 
 Turn a `PARAMS` object into the most narrow set of types and also fill in all
 internal-use parts of the object.

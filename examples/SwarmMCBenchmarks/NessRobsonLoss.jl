@@ -12,7 +12,6 @@ end
 
 @xport function SetupParams(;lossa=1e-3u"Å^2/sqrt(eV)",
                             lossp=0.5,
-                            ans_style=ANS_NOTHING(),
                             gns_style=GNS_UPDATE_LOG2FAC(),
                             weight_reduction=0.5,
                             # split_fake=false,
@@ -33,9 +32,7 @@ end
     p.gen_cf = (args...) -> CollFreqs(args..., lossa, lossp)
 
     p.generate_next_step_style = gns_style
-    p.adapt_noncons_style = ans_style
     p.weight_reduction = weight_reduction
-    # p.fake_noncons_split_weight = split_fake
 
     p.eps_grid = 1eV * LogRange(-5, 3, 1001)
     p.t_grid = LinRange(0, 5e10, 1001) * SwarmMC.uT

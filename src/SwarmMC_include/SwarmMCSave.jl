@@ -1,6 +1,6 @@
 
 """
-MakeSaveName(prefix ; separate_dir=true, kwds...)
+`MakeSaveName(prefix ; separate_dir=true, kwds...)`
 
 Make up a filename prefix to save as, which is:
 `"prefix:kwd1=val1:kwd2=val2:..."`
@@ -47,7 +47,7 @@ function SavePrefix(p::PARAMS)
 end
 
 """
-Save(params, props ; mmap=false)
+`Save(params, props ; mmap=false)`
 
 Find a new filename and save the `params` and `props` into it using `JLD2`.
 
@@ -85,7 +85,7 @@ end
 using Glob
 
 """
-PrefixSets()
+`PrefixSets()`
 
 Return all the different unique sets of prefixes in the current directory.
 """
@@ -117,7 +117,7 @@ Return all the different unique sets of prefixes in the current directory.
 end
 
 """
-CollectUp()
+`CollectUp()`
 
 Combine files from the same prefix into one file.
 """
@@ -211,7 +211,7 @@ struct NoValidFiles <: Exception
 end
 
 """
-ReadAll(prefix)
+`ReadAll(prefix)`
 
 Load and combine all `params` and `props` from files belonging to a particular
 `prefix`, i.e. the part of the filenames before the `"__*.jld2"` part.
@@ -357,8 +357,8 @@ end
 using DataStructures
 
 """
-NameElements(str)
-NameElements(str, index::String)
+`NameElements(str)
+NameElements(str, index::String)`
 
 Split and identify the different parts of a prefix.
 

@@ -355,6 +355,21 @@ function RecordMeasurements!(int)
     set_u!(int, new_u)
 end
 
+"""
+`INTEGRATOR`
+
+The parameter object passed to `DifferentialEquations.jl` to provide information
+about the simulation. The user should not need to care about this, unless they
+are trying to implement custom callbacks.
+
+A custom callback will have access to this structure and hence the following
+properties:
+- `params` - the [`PARAMS`](@ref) used for the simulation
+- `part` - the current state of the particle
+- `extra_part_list` - any additional particles to pass back to the simulation
+  (e.g. created during ionisation).
+- `props_out` - the measurements object
+"""
 @AutoParm mutable struct INTEGRATOR
     params::AUTO
     part::PARTICLE
