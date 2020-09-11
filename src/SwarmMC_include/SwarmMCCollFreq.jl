@@ -324,6 +324,41 @@ end
     
 
 
+"""
+CreateCollFreq(params, gas, ptype,
+               name,
+               colltype::CF_STYLE_ENUM, 
+               gencf::GENCF_PARAMS
+               ;
+               threshold=0.0uE,
+               ion_sharing_style=ISS_AFE(),
+               ion_sharing_ratio=0.5,
+               is_cross_section=true)
+               
+Generate a `COLLFREQ` object, should be used for creating the list to be given
+to `gen_cf` of the params object.
+
+The collision type should be chosen from one of those in
+[`CF_STYLE_ENUM`](@ref). The details of the form of the collision frequency
+should be provided with `gencf`. Options are:
+
+- GENCF_MANUAL - an arbitrary functional form of the cross section
+- GENCF_INTERP - interpolate a given list of energy and cross section
+- GENCF_INTERPLOG - as with GENCF_INTERP but interpolate on the log values
+
+Some convenience structs:
+- GENCF_HARDSPHERE
+- GENCF_MAXWELL
+- GENCF_ATTACH - for the Ness-Robson attachment benchmark
+
+By default, these are interpreted as a cross section. If a collision frequency
+is directly required, then set `is_cross_section` to false.
+
+For inelastic cross sections, `threshold` is important.
+For ionisation cross sections, `ion_sharing_style` and `ion_sharing_ratio` is important.
+
+DCS values can be provided using `angle_dist_cum`.
+"""               
 @xport function CreateCollFreq(params::PARAMS, gas::GAS, ptype::PARTTYPE, name::String, colltype::CF_STYLE_ENUM, gencf::GENCF_PARAMS ; threshold=0.0uE, ion_sharing_style=ISS_AFE(), ion_sharing_ratio=0.5, is_cross_section=true, new_ptype=nothing, angle_dist_cum=nothing, manual_degen=0.)
 
     manual_degen != 0. && @assert colltype == CFS_INELASTIC_MANUAL_DEGEN()

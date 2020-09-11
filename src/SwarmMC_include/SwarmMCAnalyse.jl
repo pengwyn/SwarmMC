@@ -2,12 +2,24 @@
 using Match
 
 import DataStructures: OrderedDict
+
+"""
+Quants(params, props ; mbin, SI=true, n0_factors=false, include_errors=true)
+
+Generate a dictionary of commonly used transport quantities from time averages
+in `props`. The type of measurement bin can be selected in `mbin`, although it
+must be either an instantaneous or cumulative time-only set of measurements.
+
+`n0_factors` indicate that the appropriate density-scaling factors (e.g.
+`n0*DT`) will be given instead of the raw values.
+
+"""
 @xport function Quants(params::PARAMS, props::PROPS_OUT ; mbin::MEAS_BIN=first(props.meas).mbin, SI=true, n0_factors=false, include_cf=false, steady_state=true, n0_scale=1., include_errors=true)
     params = Finalise(params)
 
     if IsTrue(mbin.cumulative)
         times = TGrid(params)
-        weights = DT(params)
+        weights = ΔT(params)
     else
         times = TInstGrid(params)
         weights = ones(length(times))
@@ -244,6 +256,19 @@ import DataStructures: OrderedDict
 end
 
 using DataFrames
+
+"""
+GetAll(names... ; kwds...)
+
+Read all sets of results in the current directory, extracting quantities given
+by `names`. Each name can be either:
+
+- a symbol, in which case a key from [`Quants`](@ref) is used.
+- a string, in which case a parameter from the filename prefix is used. See [`NameElements`](@ref)
+- a function, `f(params,props,prefix,quants)` which produces a value.
+
+A `name` may also be a Pair, `name => value`, where `value` is one of the three choices above.
+"""
 @xport function GetAll(names... ; restrict=r"", exclude=r"^$", sortby=:prefix, n0_factors=false, quiet=false, include_prefix=false, include_sortby=false, quants_kwds=Any[:SI=>true, :n0_factors=>true, :include_errors=>false], prefix_list=:auto, as_df=true)
 
     if include_sortby === nothing
@@ -503,7 +528,7 @@ end
 
 @xport function Dists(params::PARAMS, props::PROPS_OUT, meas_type=(:eps,:cum,:ss), part_ind=1 ; conv_units=false)
     eps = EpsGrid(params)[1:end-1]
-    deps = DEps(params)[1:end-1]
+    deps = ΔEps(params)[1:end-1]
 
     duration = props[:duration, meas_type, part_ind][1:end-1]
 

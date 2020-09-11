@@ -1,4 +1,12 @@
-# This is the wrapper to finalise the params
+
+"""
+BunchedPropagate(params, N ; return_part_list=false)
+
+Run a simulation of `N` particles using `params`. Returns a `PROPS_OUT` object.
+
+If you pass true to `return_part_list` then the initial and final particle lists
+will also be returned.
+"""
 @xport function BunchedPropagate(params, N, verbose=TypeTrue() ; kwds...)
     params = Finalise(params)
     int = SetupIntegrator(params)
@@ -90,13 +98,9 @@ function BunchedPropagateInternal(params, N, int, verbose=TypeTrue() ; return_pa
             ratio = length(part_list) / orig_N
 
             if ratio < 0.1 || length(part_list) == 0
-                if params.adapt_noncons_style == ANS_NOTHING()
-                    if length(new_list) == 0
-                        @info "Out of particles with no adapt style."
-                        @goto endofloops
-                    end
-                else
-                    error("Can't continue without particles")
+                if length(new_list) == 0
+                    @info "Out of particles with no adapt style."
+                    @goto endofloops
                 end
             end
 
@@ -264,6 +268,16 @@ function SetupParallelBunchedPropagate(p)
     nothing
 end
 
+"""
+LoopMaxTime(params, N ; walltime=:auto)
+
+Runs simulations repeatedly until `walltime` (a `Unitful` quantity) is reached.
+
+If `walltime` is `:auto` then try to lookup the environment variable
+`SWARMMC_WALLTIME` and interpret it as a time in minutes.
+
+`N` and `params` are passed through to `BunchedPropagate`.
+"""
 @xport function LoopMaxTime(p, args... ; walltime = :auto, multiprocessing=true)
     if walltime == :auto
         if "SWARMMC_WALLTIME" in keys(ENV)

@@ -9,8 +9,6 @@ push!(sym_list, [Symbol(sym,"_pow",pow) for sym in [:vel, :pos, :energy],
                  pow in [2,3]]...)
 push!(sym_list, :energy_vel_vel)
 
-# function CumulValue end
-function InstValue end
 InstValue(quant::MEAS_QUANT{LABEL}, args...) where LABEL = InstValue(Val(LABEL), args...)
 InstValue(prop::Val, part::PARTICLE) = InstValue(prop, part.weight, part.log2fac, part.pos, part.vel, EpsFromVel(part))
 # Even though some of these look the same, they change with the log2facs
@@ -21,7 +19,6 @@ InstValue(::Val{:weight}, weight, log2fac, pos, vel, eps) = weight * weight * ex
 InstValue(::Val{:preweight}, weight, log2fac, pos, vel, eps) = weight * weight
 InstValue(::Val{:log2weight}, weight, log2fac, pos, vel, eps) = weight * log2fac
 
-Log2Fac(::Val, log2fac) = log2fac
 Log2Fac(::Val{:sqrdenom}, log2fac) = log2fac*2
 Log2Fac(::Val{:invdenom}, log2fac) = -log2fac
 

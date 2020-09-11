@@ -49,10 +49,22 @@ Base.convert(::Type{Union{Function,T}}, x::T2) where {T<:Number, T2<:Number} = c
 ################################################################################
 # ** Measurements
 
+"""
+MEAS_BIN
+    
+Define the times, positions or energies in which measurements are to be divided
+into. It also selects whether measurements should be cumulative or
+instantaneous.
+
+The constructor takes symbols, e.g. `MEAS_BIN(:cum,:t)` represents cumulative
+measurements in time bins and `MEAS_BIN(:ss,:eps,:r)` are instantaneous
+measurements in energy and radial bins, only for the steady-state times, defined
+by `steady_state_frac` in `PARAMS`.
+"""
 @xport @AutoParm struct MEAS_BIN
     steady_state::AUTO <: TypeBool
     cumulative::AUTO <: TypeBool
-    # region::AUTO <: TypeBool
+    # user::AUTO <: TypeBool
 
     with_t::AUTO <: TypeBool
     with_r::AUTO <: TypeBool
@@ -64,7 +76,7 @@ end
 # Convenience constructors allowing for e.g. MEAS_BIN(:t, :cum, :ss)
 MEAS_BIN(syms::NTuple{N,Symbol} where N) = MEAS_BIN(syms...)
 function MEAS_BIN(syms::Symbol...)
-    steady_state = cumulative = region = with_cf = with_t = with_r = with_z = with_eps = with_costh = TypeFalse()
+    steady_state = cumulative = with_cf = with_t = with_r = with_z = with_eps = with_costh = TypeFalse()
 
     for sym in syms
         if sym == :ss
@@ -72,9 +84,6 @@ function MEAS_BIN(syms::Symbol...)
             cumulative = TypeTrue()
         elseif sym == :cum
             cumulative = TypeTrue()
-        # elseif startswith(String(sym), "region")
-        #     #region = TypeTrue()
-        #     region = sym
         elseif sym == :t
             with_t = TypeTrue()
         elseif sym == :r
@@ -90,10 +99,6 @@ function MEAS_BIN(syms::Symbol...)
         end
     end
 
-    # if Bool(region)
-    # if region != TypeFalse()
-    #     @assert !Bool(cumulative) && !Bool(steady_state)
-    # end
     if Bool(with_costh)
         @assert !Bool(cumulative) && !Bool(steady_state)
     end
@@ -112,7 +117,6 @@ function GetSymbols(x::MEAS_BIN)
     
     IsTrue(x.steady_state) && push!(thelist, :ss)
     IsTrue(x.cumulative) && push!(thelist, :cum)
-    # !(x.region == TypeFalse()) && push!(thelist, :region)
 
     for sym in [:t, :r, :z, :eps, :costh]
         if IsTrue(getproperty(x, Symbol(:with_, sym)))
@@ -133,13 +137,35 @@ end
 # * COMB_MEAS
 #----------------------------
 
-# MEAS_QUANT defines the quantity measured.
+"""
+MEAS_QUANT
+
+References the quantity that is measured and will be placed into `MEAS_BIN`.
+A quantity defined this way should then extend `InstMeas` to implement the
+measure itself.
+"""
 struct MEAS_QUANT{label, unit, kind} end
 MEAS_QUANT(label, unit, kind=Float64) = MEAS_QUANT{label,unit,kind}()
 
+"""
+InstValue(::Val{sym}, weight, log2fac, pos, vel, eps)
+
+The value of the quantity (`sym`) being measured, given the current particle
+properties are `pos`, `vel`, `eps` and the particle's weight is given by
+`weight + 2^log2fac`.
+"""
+InstValue(::Val{T}, weight, log2fac, pos, vel, eps) where T = error("InstValue not defined for quantity $T.")
+
+"""
+Log2Fac(::Val{sym}, log2fac)
+
+What log2fac should be assigned to this quantity. Only relevant for measurements
+that are considering the weights.
+"""
+Log2Fac(::Val, log2fac) = log2fac
+
 FullType(::Type{Float64}, unit) = QComb(unit,uN)
 FullType(::Type{XYZ}, unit) = XYZ{QComb(unit,uN)}
-FullType(T::Type{MVector}, unit) = T{QComb(unit,uN)}
 FullType(::Type{Vector}, unit) = Vector{QComb(unit,uN)}
 
 FullTypeCumul(kind, unit) = FullType(kind, QComb(unit,uT))
@@ -188,6 +214,12 @@ end
 ################################################################################
 # * PROPS_OUT
 
+"""
+PROPS_OUT
+
+Structure to store measurements taken during a simulation. This struct supports
+convenient querying of different quantities for different bins.
+"""
 @xport @AutoParm mutable struct PROPS_OUT
     meas::Array{MEAS_LOG2,3}
     walltime::Q(u"s")
@@ -215,6 +247,15 @@ GetVal(val::Nothing, args...) = 0.0 # Not so useful - no units! Should at least 
 const last_gas_ind = Ref(0)
 NextGasInd() = (last_gas_ind[] += 1)
 
+"""
+GAS(; name::Symbol=:gas, m0, ρ, tmtr)
+
+The definition of a gas. The temperature `tmtr` defaults to zero, which itself
+must be specified as `nothing`.
+
+Both `ρ` and `tmtr` can accept a number or a function which itself takes one
+argument: `pos`.
+"""
 @AutoParm @xport struct GAS
     name::Symbol = :gas
 	m0::Q(uM)
@@ -223,49 +264,6 @@ NextGasInd() = (last_gas_ind[] += 1)
     ind::Int = NextGasInd()
 end
 
-
-# ################################################################################
-# # ** REGION
-
-# @TypeEnumExport REGION_EVENT REGION_EVENT_NULL REGION_EVENT_DIE
-
-# @xport mutable struct REGION_EVENT_MEASURE <: REGION_EVENT
-#     meas_type::MEAS_BIN
-#     kill::Bool
-#     meas_ind
-# end
-# REGION_EVENT_MEASURE(meas_type::MEAS_BIN, kill=true) = REGION_EVENT_MEASURE(meas_type, kill, nothing)
-# REGION_EVENT_MEASURE(meas_type, args...) = REGION_EVENT_MEASURE(MEAS_BIN(meas_type), args...)
-
-# last_region_ind = 0
-# @xport mutable struct REGION{NAME}
-#     # E::Float64
-#     # V::Float64
-#     # B::Float64
-#     E::Q(uF)
-#     V::Q(uV)
-#     B::Q(uB)
-
-#     # left::Float64
-#     # right::Float64
-#     left::Q(uL)
-#     right::Q(uL)
-
-#     leave_event::REGION_EVENT
-#     enter_event::REGION_EVENT
-
-#     ind::Int
-# end
-# function REGION{NAME}(; E=0uF, V=0uV, B=0uB, left=-Inf*uL, right=Inf*uL, leave_event=REGION_EVENT_NULL(), enter_event=REGION_EVENT_NULL()) where NAME
-#     global last_region_ind
-#     last_region_ind += 1
-
-#     REGION{NAME}(E, V, B, left, right, leave_event, enter_event, last_region_ind)
-# end
-# GetName(::REGION{NAME}) where NAME = string(NAME)
-# GetSymbol(::REGION{NAME}) where NAME = NAME
-
-# TODO: Can include these again, for measurement (or absorbing) purposes.
 
 ################################################################################
 # ** PARTTYPE
@@ -282,6 +280,12 @@ NextPTypeInd() = (last_ptype_ind[] += 1)
 # @xport mutable struct PARTTYPE{NAME,
 #                         T_DELAY_LOOKUP,
 #                         T_DELAY_EVENT}
+
+"""
+PARTTYPE(;name=:particle, mass=1mₑ, charge=1q)
+
+The definition of the type of particle, giving a mass and charge.
+"""
 @AutoParm @xport mutable struct PARTTYPE
     name::Symbol = :particle
     mass::Q(uM) = 1.0u"mₑ"
@@ -289,8 +293,8 @@ NextPTypeInd() = (last_ptype_ind[] += 1)
 
     # delay_lookup::T_DELAY_LOOKUP
     # delay_event::T_DELAY_EVENT
-    delay_lookup = ()->Inf*uT
-    delay_event = DELAY_EVENT_NULL()
+    # delay_lookup = ()->Inf*uT
+    # delay_event = DELAY_EVENT_NULL()
 
     ind::Int = NextPTypeInd()
 end
@@ -305,16 +309,40 @@ abstract type CFS_INELASTIC_ABSTRACT <: CF_STYLE_ENUM end
 struct CFS_INELASTIC <: CFS_INELASTIC_ABSTRACT end
 struct CFS_INELASTIC_MANUAL_DEGEN <: CFS_INELASTIC_ABSTRACT end
 
+@doc """
+CF_STYLE_ENUM
+
+The type of collision frequency process.
+
+These types are hopefully obvious:
+- CFS_ELASTIC
+- CFS_INELASTIC
+- CFS_LOSS
+- CFS_IONISATION
+
+The types that might need some more explanation are:
+- CFS_NULL - for introducing manually configured null collisions.
+- CFS_INELASTIC_MANUAL_DEGEN - an inelastic cross section with manually set ground/excitation populations, as opposed to using the gas temperature.
+- CFS_CHANGETYPE - changes the type of particle.
+
+""" CF_STYLE_ENUM
+
 @TypeEnumExport ISS_ENUM ISS_FRACTION ISS_AFE #ISS_FUNC
 @xport struct ISS_FUNC{T} <: ISS_ENUM
     func::T
 end
 
-# mutable struct COLLFREQ{T_COLLTYPE,
-#                         T_FUNC,
-#                         T_COM_FUNC}
+@doc """
+ISS_ENUM
+
+Options for ionisation energy sharing
+
+- ISS_FRACTION - specify an exact constant fraction
+- ISS_AFE - all fractions equiprobable
+- ISS_FUNC - the fraction is chosen at the time of collision.
+""" ISS_ENUM
+
 @xport mutable struct COLLFREQ
-    #colltype::T_COLLTYPE
     colltype::CF_STYLE_ENUM
     name::String
 
@@ -332,20 +360,18 @@ end
 
     new_ptype_ind::Int
 
-    # func::T_FUNC
-    # com_func::T_COM_FUNC
     func
     com_func
 end
 
-@xport abstract type DELAY_EVENT end
-@xport struct DELAY_EVENT_NULL <: DELAY_EVENT end
-@xport struct DELAY_EVENT_CHANGETYPE <: DELAY_EVENT
-    new_ptype::PARTTYPE
-    return_vel
-    DELAY_EVENT_CHANGETYPE(new_ptype, return_vel=0.) = new(new_ptype, return_vel)
-end
-@xport struct DELAY_EVENT_LOSS <: DELAY_EVENT end
+# @xport abstract type DELAY_EVENT end
+# @xport struct DELAY_EVENT_NULL <: DELAY_EVENT end
+# @xport struct DELAY_EVENT_CHANGETYPE <: DELAY_EVENT
+#     new_ptype::PARTTYPE
+#     return_vel
+#     DELAY_EVENT_CHANGETYPE(new_ptype, return_vel=0.) = new(new_ptype, return_vel)
+# end
+# @xport struct DELAY_EVENT_LOSS <: DELAY_EVENT end
 
 
 ################################################################################
@@ -368,8 +394,6 @@ end
     r_bin::Int = 0
     t_bin::Int = 0
 
-    delay_time::Q(uT) = zero(Q(uT))
-
     cur_mass::Q(uM) = zero(Q(uM))
     cur_charge::Q(uC) = zero(Q(uC))
 end
@@ -388,13 +412,82 @@ abstract type PARTICLE_INIT_TIME_STYLE end
 
 
 @TypeEnumExport GNS_ENUM GNS_DOUBLE GNS_REGEN_ALL GNS_NOTHING GNS_UPDATE_LOG2FAC
-@TypeEnumExport ANS_ENUM ANS_FAKE_NONCONS ANS_NOTHING
+
+@doc """
+GNS_ENUM
+
+The style for generating or removing particles for the next time bin.
+
+- GNS_NOTHING - don't ever generate or remove new particles
+- GNS_UPDATE_LOG2FAC - as with GNS_NOTHING but update the log2fac of the particles.
+- GNS_DOUBLE - when there are too few particles, double those that are left.
+- GNS_REGEN_ALL - when the effective number of particles gets too high or low,
+                  regenerate by sampling the same weights of particles.
+""" GNS_ENUM
 
 @enum StepEvents Event_none Event_coll Event_epsbin Event_zbin Event_region Event_rbin Event_delay
 Base.to_index(x::StepEvents) = Int(x)
 Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
 
 
+"""
+PARAMS(; kwds...)
+
+The main parameters object. The parameters can be set as keywords or by mutating
+the structure afterwards. When finished setting the parameters, call
+`Finalise(...)` on the object which will set the structure type parameters and
+fill in the necessary interal-use-only fields.
+
+Keywords that must be set (no defaults):
+- `init_style` - how particles are generated
+- `t_grid` - the time grid used for the simulation and for measurements
+- `z_grid`, `r_grid` - the grids used for measurements
+- `gas_list` - a list of `GAS` objects
+- `ptype_list` - a list of `PARTTYPE` objects
+- `gen_cf` - a function that returns the list of collision frequencies for each
+  gas and particle type combination. Function signature `(params, gas, ptype) -> ...`
+
+Keywords that have defaults:
+- `eps_grid` - the energy grid used for measurements
+- `meas_bins` - the bins for measurements
+- `meas_quants` - the quantities measured
+- `steady_state_timefrac` - defines the time at which steady-state measurements
+  are taken from.
+
+- `E_field` - the electric field. Can be `nothing`, an XYZ vector, or a function
+    of signature `(pos,time) -> ...`.
+- `B_field` - the magnetic field. Can be `nothing`, an XYZ vector, or a function
+    of signature `(pos,time) -> ...`.
+
+- `min_log2_weight` - the point at which if a particle's weight is less than `2^min_log2_weight`
+- `weight_reduction` - the percentage of the weight that is lost in a loss collision.
+- `ionisation_as_weight` - whether to either create a secondary particle in
+  ionisation, or to double the weight. 
+
+- `generate_next_step_style` - one of [`GNS_ENUM`](@ref) types for refreshing the
+    particle list for each timestep.
+- `only_regen_for_too_many` - when true, don't ever generate extra particles
+    when using `GNS_REGEN_ALL`.
+- `max_substepsize` - the maximum timestep. Use this when the time grid is too
+    coarse to handle changing numbers of particles.
+- `runaway_threshold` - the multiplicative factor to judge when a runaway of
+  particles is occuring, which will stop the simulation.
+
+- `static_structure_factor` - the static structure factor used for elastic collisions
+
+- `save_name` - the name for saving, see [`MakeSaveName`](@ref)
+
+- `do_event_meas` - if true, store information in `event_counts`
+- `show_events` - log whenever an event occurs.
+
+- `handle_temperature_bias` - set this to false to force sampling gas velocities
+  directly (and incorrectly) from a Maxwellian distribtion.
+
+- `user_callbacks` - a list of additional callbacks to provide to the ODE
+  solver. These callbacks will directly interface with
+  `DifferentialEquations.jl`. For reference, the `p` in the integrator object
+  will be of type [`INTEGRATOR`](@ref). 
+"""
 @xport @AutoParm mutable struct PARAMS
     len_unit::Q(uL) = 1.0uL
     eps_unit::Q(uE) = 1.0uE
@@ -420,13 +513,12 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
     # Internal use only
     has_cum_meas::AUTO = nothing
 
-    meas_num_l::Int = 0
+    # meas_num_l::Int = 0
 
     steady_state_timefrac::Float64 = 0.5
 
 	gas_list::AUTO = GAS[]
     ptype_list::AUTO = PARTTYPE[]
-    # region_list::AUTO = REGION[]
 
     gen_cf::Function = (params, gas, ptype) -> []
 
@@ -442,17 +534,9 @@ Base.length(x::Type{StepEvents}) = length(instances(StepEvents))
     ionisation_as_weight::AUTO <: TypeBool = TypeTrue()
 
     generate_next_step_style::AUTO = GNS_REGEN_ALL()
-    adapt_noncons_style::AUTO = ANS_NOTHING()
     only_regen_for_too_many::Bool = false
     max_substepsize::Q(uT) = Inf*uT
     runaway_threshold::Int = 100
-
-	# fake_noncons_active::Bool = false
-    # #fake_noncons_cf::Union{COLLFREQ, Nullable{COLLFREQ}}
-    # # TODO: Need to remove this if possible.
-    # fake_noncons_cf::Union{COLLFREQ,Nothing} = nothing
-    # fake_noncons_rate::Float64 = 0.
-    # fake_noncons_split_weight::Bool = false
 
     static_structure_factor::AUTO = nothing
 
@@ -473,17 +557,72 @@ end
 Base.broadcastable(x::PARAMS) = Ref(x)
 
 # Annoying with all the finalisation in here, but very convenient otherwise.
+"""
+TGrid(params)
+
+Return the midpoint of all time bins, which is the value relevant for cumulative measurements.
+"""
 @xport TGrid(params::PARAMS) = RunningAvg(Finalise(params).t_grid)
+"""
+TInstGrid(params)
+
+Return the points at which instantaneous measurements correspond to.
+"""
 @xport TInstGrid(params::PARAMS) = Finalise(params).t_grid[begin+1:end]
-@xport DT(params::PARAMS) = diff(Finalise(params).t_grid)
+"""
+ΔT(params)
+
+Return the size of the cumulative time measurement bins.
+"""
+@xport ΔT(params::PARAMS) = diff(Finalise(params).t_grid)
+"""
+RGrid(params)
+
+Return the midpoint of the radial measurement bins.
+"""
 @xport RGrid(params::PARAMS) = RunningAvg(Finalise(params).r_bin_grid)
-@xport DR(params::PARAMS) = diff(Finalise(params).r_bin_grid)
+"""
+ΔR(params)
+
+Return the size of the radial measurement bins.
+"""
+@xport ΔR(params::PARAMS) = diff(Finalise(params).r_bin_grid)
+"""
+ZGrid(params)
+
+Return the midpoint of the spatial z measurement bins.
+"""
 @xport ZGrid(params::PARAMS) = RunningAvg(Finalise(params).z_bin_grid)
-@xport DZ(params::PARAMS) = diff(Finalise(params).z_bin_grid)
+"""
+ΔZ(params)
+
+Return the size of the spatial z measurement bins.
+"""
+@xport ΔZ(params::PARAMS) = diff(Finalise(params).z_bin_grid)
+"""
+EpsGrid(params)
+
+Return the midpoint of the energy measurement bins.
+"""
 @xport EpsGrid(params::PARAMS) = RunningAvg(Finalise(params).eps_bin_grid)
-@xport DEps(params::PARAMS) = diff(Finalise(params).eps_bin_grid)
+"""
+ΔEps(params)
+
+Return the size of the energy measurement bins.
+"""
+@xport ΔEps(params::PARAMS) = diff(Finalise(params).eps_bin_grid)
+"""
+CosthGrid(params)
+
+Return the midpoint of the costheta measurement bins.
+"""
 @xport CosthGrid(params::PARAMS) = RunningAvg(Finalise(params).costh_bin_grid)
-@xport DCosth(params::PARAMS) = diff(Finalise(params).costh_bin_grid)
+"""
+ΔCosth(params)
+
+Return the size of the costheta measurement bins.
+"""
+@xport ΔCosth(params::PARAMS) = diff(Finalise(params).costh_bin_grid)
 
 function Base.show(io::IO, params::PARAMS)
     print(io, "PARAMS with Gas=[" * join(getproperty.(params.gas_list, :name), ",") * "], "
@@ -537,14 +676,10 @@ function PARTICLE(pos, vel, time, ptype, params)
     r_bin = RBin(pos, params.r_bin_grid)
     t_bin = 0
 
-    # region_ind = FindRegion(pos, params.region_list)
-
-    delay_time = ptype.delay_lookup()
-
     weight = 1uN
     log2fac = 0
 
-    part = PARTICLE(; pos, vel, time, ptype_ind=ptype.ind, eps_bin, z_bin, r_bin, delay_time)
+    part = PARTICLE(; pos, vel, time, ptype_ind=ptype.ind, eps_bin, z_bin, r_bin)
     UpdateParticleLookups(part, params)
 
     return part
@@ -581,6 +716,13 @@ end
 ################################################################################
 # ** Simple maths
 
+"""
+EpsFromVel(vel, mass)
+EpsFromVel(vel, ::PARTTYPE)
+EpsFromVel(::PARTICLE)
+
+Calculate the energy of a particle from the velocity and mass.
+"""
 function EpsFromVel(vel::VelVec, mass::Q(uM))
     mass == Inf && return Inf
 
@@ -660,7 +802,7 @@ end
 
 function ChangePType(part::PARTICLE, new_ptype::PARTTYPE, params::PARAMS)
     part.ptype_ind = new_ptype.ind
-    part.delay_time = new_ptype.delay_lookup()
+    # part.delay_time = new_ptype.delay_lookup()
     # This might not be the best idea in the future, but for now...
     part.vel *= 0.
 

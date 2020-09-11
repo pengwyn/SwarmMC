@@ -1,4 +1,12 @@
 
+"""
+MakeSaveName(prefix ; separate_dir=true, kwds...)
+
+Make up a filename prefix to save as, which is:
+`"prefix:kwd1=val1:kwd2=val2:..."`
+
+If `separate_dir` is true then prefix all of the filenames with `"runs_prefix/"`
+"""
 @xport function MakeSaveName(prefix ; separate_dir=true, kwds...)
     items = map(collect(kwds)) do pair
         name,val = pair
@@ -38,6 +46,13 @@ function SavePrefix(p::PARAMS)
     return p.save_name
 end
 
+"""
+Save(params, props ; mmap=false)
+
+Find a new filename and save the `params` and `props` into it using `JLD2`.
+
+Choose whether to save with `IOStream` or `mmap` from the keyword.
+"""
 @xport function Save(in_params::PARAMS, props::PROPS_OUT, prefix::String=SavePrefix(in_params) ; mmap::Bool=false)
     in_params = Finalise(in_params)
 
@@ -68,6 +83,12 @@ end
 end
 
 using Glob
+
+"""
+PrefixSets()
+
+Return all the different unique sets of prefixes in the current directory.
+"""
 @xport function PrefixSets(restrict=r"", quiet=false)
     filelist = glob("*__*.jld2")
     sort!(filelist)
@@ -95,6 +116,11 @@ using Glob
     thedict
 end
 
+"""
+CollectUp()
+
+Combine files from the same prefix into one file.
+"""
 @xport function CollectUp(args... ; recurse=true, kwds...)
     if recurse
         for (dirname,) in walkdir(".")
@@ -184,6 +210,12 @@ struct NoValidFiles <: Exception
     prefix::String
 end
 
+"""
+ReadAll(prefix)
+
+Load and combine all `params` and `props` from files belonging to a particular
+`prefix`, i.e. the part of the filenames before the `"__*.jld2"` part.
+"""
 ReadAll(params::PARAMS; kwds...) = ReadAll(SavePrefix(params); kwds...)
 @xport function ReadAll(prefix::String; quiet=false, print_dots=false, move_bad_out=false, keep_on_error=true, ignore_exc=true)
     filelist = glob(prefix * "__*.jld2")
@@ -323,6 +355,15 @@ end
 #----------------------------
 
 using DataStructures
+
+"""
+NameElements(str)
+NameElements(str, index::String)
+
+Split and identify the different parts of a prefix.
+
+In the second form, return a specific part given by `index`.
+"""
 @xport function NameElements(str::AbstractString ; doparse=true)
     if occursin(":", str)
         splitchar = ':'

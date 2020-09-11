@@ -7,7 +7,7 @@ pushfirst!(LOAD_PATH, joinpath(dirname(pathof(SwarmMC)), "..", "examples","Swarm
     if "MOD_LIST" in keys(ENV)
         mod_list = split(ENV["MOD_LIST"], ',') .|>  Symbol
     else
-        mod_list =[:Hardsphere, :ConstIon, :LucasSaelee, :MagneticField, :Maxwell, :NessRobsonLoss, :NessRobsonSharing, :PercusYevick, :ReidAniso, :ReidRamp, :SuperModel, :Argon, :DaleTanhTest]
+        mod_list =[:ConstIon, :LucasSaelee, :MagneticField, :Maxwell, :NessRobsonLoss, :NessRobsonSharing, :PercusYevick, :ReidAniso, :ReidRamp, :SuperModel, :Argon, :DaleTanhTest, :Hardsphere]
     end
 
     @testset "Benchmark $mod" for mod in mod_list
