@@ -3,11 +3,11 @@ using SwarmMC
 
 pushfirst!(LOAD_PATH, joinpath(dirname(pathof(SwarmMC)), "..", "examples","SwarmMCBenchmarks"))
 
-@testset begin
+@testset "All benchmarks" begin
     if "MOD_LIST" in keys(ENV)
         mod_list = split(ENV["MOD_LIST"], ',') .|>  Symbol
     else
-        mod_list =[:ConstIon, :LucasSaelee, :MagneticField, :Maxwell, :NessRobsonLoss, :NessRobsonSharing, :PercusYevick, :ReidAniso, :ReidRamp, :SuperModel, :Argon, :DaleTanhTest, :Hardsphere]
+        mod_list =[:ConstIon, :LucasSaelee, :MagneticField, :Maxwell, :NessRobsonLoss, :NessRobsonSharing, :PercusYevick, :ReidRamp, :SuperModel, :Argon, :DaleTanhTest, :Hardsphere]
     end
 
     @testset "Benchmark $mod" for mod in mod_list

@@ -40,15 +40,12 @@ end
 
     p.meas_bins = (MEAS_BIN(:cum,:t), MEAS_BIN(:ss, :cum), MEAS_BIN(:t))
 
-    ansstr = string(typeof(ans_style).name.name)
-    ansstr = ansstr[5:end]
     gnsstr = string(typeof(gns_style).name.name)
     gnsstr = gnsstr[5:end]
 
     p.save_name = MakeSaveName("NRL",
                                p=lossp,
                                a=ustrip(lossa),
-                               ans=ansstr,
                                gns=gnsstr,
                                red=weight_reduction,
                                # split=split_fake,
