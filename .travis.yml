@@ -18,7 +18,8 @@ cache:
 
 
 script:
-  - julia --project --color=yes --check-bounds=yes -e 'using Pkg; pkg"add https://github.com/pengwyn/AndExport.jl https://github.com/pengwyn/MsgWrap.jl https://github.com/pengwyn/AutoParameters.jl https://github.com/pengwyn/DiffEqBase.jl#callback-zero https://github.com/pengwyn/ObjectSaving.jl"'
+  - julia --project --color=yes -e 'using Pkg; pkg"add https://github.com/pengwyn/AndExport.jl https://github.com/pengwyn/MsgWrap.jl https://github.com/pengwyn/AutoParameters.jl https://github.com/pengwyn/DiffEqBase.jl#callback-zero https://github.com/pengwyn/ObjectSaving.jl https://github.com/ahwillia/NonNegLeastSquares.jl"'
+  - julia --project --color=yes -e 'using Pkg; Pkg.test("SwarmMC", coverage=true)'
 jobs:
   fast_finish: true
   allow_failures:
@@ -28,6 +29,7 @@ jobs:
       julia: 1
       os: linux
       script:
+        - julia --project=docs/ --color=yes -e 'using Pkg; pkg"add https://github.com/pengwyn/AndExport.jl https://github.com/pengwyn/MsgWrap.jl https://github.com/pengwyn/AutoParameters.jl https://github.com/pengwyn/DiffEqBase.jl#callback-zero https://github.com/pengwyn/ObjectSaving.jl https://github.com/ahwillia/NonNegLeastSquares.jl"'
         - julia --project=docs/ -e '
           using Pkg;
           Pkg.develop(PackageSpec(path=pwd()));
