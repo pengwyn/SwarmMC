@@ -48,6 +48,7 @@ JLD2 = ">= 0.2"
 
 [extras]
 NonNegLeastSquares = "b7351bd1-99d9-5c5d-8786-f205a815c4d7"
+MAT = "23992714-dd62-5051-b70f-ba57cb901cac"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]

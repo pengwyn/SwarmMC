@@ -4,6 +4,7 @@ import ConstIon
     ion_style in [ISS_AFE(), ISS_FRACTION()],
     ionweight in [true,false]
 
-    params = Finalise(ConstIon.SetupParams(;gns, ion_style, ionweight))
+    params = ConstIon.SetupParams(;gns, ion_style, ionweight)
+    params.t_grid = LinRange(0*SwarmMC.uT, params.t_grid[end]/100, 101)
     props = BunchedPropagate(params,10)
 end

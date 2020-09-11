@@ -77,3 +77,8 @@ SwarmMC.InstValue
 ```@docs
 SwarmMC.INTEGRATOR
 ```
+
+# TODO
+
+- [ ] Custom measurements
+- [ ] CF + nonconservative measurements

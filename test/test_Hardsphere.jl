@@ -8,10 +8,10 @@ import Hardsphere
     quants = Quants(params, props, include_errors=false)
 
     if tmtr == 293u"K"
-        @test 0.72eV < quants[:energy] < 0.77eV
-        @test 5000u"m/s" < quants[:bulk_W] < 6000u"m/s"
+        @test 0.65eV < quants[:energy] < 0.85eV
+        @test 4000u"m/s" < quants[:bulk_W] < 7000u"m/s"
     elseif tmtr == nothing
-        @test 0.70eV < quants[:energy] < 0.75eV
-        @test 5000u"m/s" < quants[:bulk_W] < 6000u"m/s"
+        @test 0.65eV < quants[:energy] < 0.85eV
+        @test 4000u"m/s" < quants[:bulk_W] < 7000u"m/s"
     end
 end
