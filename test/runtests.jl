@@ -3,6 +3,13 @@ using SwarmMC
 
 pushfirst!(LOAD_PATH, joinpath(dirname(pathof(SwarmMC)), "..", "examples","SwarmMCBenchmarks"))
 
+thorough_run = parse(Bool, get(ENV, "SWARMMC_THOROUGH", "false"))
+
+function SpeedUp!(params)
+    @assert !thorough_run
+    params.t_grid = LinRange(0*SwarmMC.uT, min(params.t_grid[end]/100, 1e3*SwarmMC.uT), length(params.t_grid))
+end
+
 @testset "All benchmarks" begin
     if "MOD_LIST" in keys(ENV)
         mod_list = split(ENV["MOD_LIST"], ',') .|>  Symbol
@@ -17,8 +24,7 @@ pushfirst!(LOAD_PATH, joinpath(dirname(pathof(SwarmMC)), "..", "examples","Swarm
         else
             @eval import $mod
             params = @eval $mod.SetupParams()
-            # Forcing small time so that tests complete quick enough
-            params.t_grid = LinRange(zero(eltype(params.t_grid)), params.t_grid[end]/100, 101)
+            thorough_run || SpeedUp!(params)
             # Assuming that 2 particles will always be enough to test all features
             props = BunchedPropagate(params, 2)
         end

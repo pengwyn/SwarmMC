@@ -5,6 +5,7 @@ import ConstIon
     ionweight in [true,false]
 
     params = ConstIon.SetupParams(;gns, ion_style, ionweight)
-    params.t_grid = LinRange(0*SwarmMC.uT, params.t_grid[end]/100, 101)
+    # params.t_grid = LinRange(0*SwarmMC.uT, params.t_grid[end]/100, 101)
+    thorough_run || SpeedUp!(params)
     props = BunchedPropagate(params,10)
 end
