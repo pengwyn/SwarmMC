@@ -95,13 +95,9 @@ function BunchedPropagateInternal(params, N, int, verbose=TypeTrue() ; return_pa
 
             @assert all(x->x.weight > 0uN, part_list)
 
-            ratio = length(part_list) / orig_N
-
-            if ratio < 0.1 || length(part_list) == 0
-                if length(new_list) == 0
-                    @info "Out of particles with no adapt style."
-                    @goto endofloops
-                end
+            if length(part_list) == 0
+                @info "Out of particles with no adapt style."
+                @goto endofloops
             end
 
             cur_time = substep_end_time
