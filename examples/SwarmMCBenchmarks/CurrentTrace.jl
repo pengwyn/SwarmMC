@@ -1,28 +1,34 @@
-__precompile__()
-
 module CurrentTrace
 
-using Generic, Constants, Reexport
-@reexport using Reexport ; @reexport using SwarmMC
+# DOES NOT WORK!
+# DOES NOT WORK!
+# DOES NOT WORK!
+# DOES NOT WORK!
+# DOES NOT WORK!
+# DOES NOT WORK!
+# DOES NOT WORK!
+# Need to reimplment delays!
+# And then fix up the rest of it...
+
+using Reexport
+@reexport using SwarmMC
 
 const Temp = 27.
-
-
 
 #TrappingCollFreq(eps, eps_threshold, mag) = (eps < 1.0 * kB*Temp / eV) * 20.0
 TrappingCollFreq(eps, eps_threshold, mag) = (eps < eps_threshold) * mag
 
 function CollFreqs(params, gas, ptype, solvation_as_loss, temperature, trap_mag)
-    if GetSymbol(ptype) == :trapped
+    if ptype.name == :trapped
         return []
     end
     
     neon_cs = readcsv("Neon_LandoltBornstein.csv", skipstart=1)
-    neon_cs[:,1] *= eV / params.eps_unit
-    neon_cs[:,2] *= (1e-10 / params.len_unit)^2
+    neon_en = neon_cs[:,1] * eV
+    neon_cs = neon_cs[:,2] * u"Å^2"
 
     cf_list = COLLFREQ[]
-    elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_INTERP(neon_cs[:,1], neon_cs[:,2]), temperature=temperature)
+    elastic = CreateCollFreq(params, gas, ptype, "elastic", CFS_ELASTIC(), GENCF_INTERP(neon_cs[:,1], neon_cs[:,2]))
     push!(cf_list, elastic)
 
     # eps_threshold = kB*temperature/eV
@@ -30,15 +36,12 @@ function CollFreqs(params, gas, ptype, solvation_as_loss, temperature, trap_mag)
     #     eps -> TrappingCollFreq(eps, eps_threshold, trap_mag)
     # end
 
-    epsstar = 37.29 * kB
+    epsstar = 37.29u"K" * kB
     trap_x = epsstar * [0., 0.00010081, 0.00020922, 0.0005721, 0.003461, 0.010102, 0.04541, 0.11103, 0.22551, 0.2743, 0.4139]
-    trap_y = 1e12 * [3000., 2960, 2674, 1761, 650.8, 215.5, 27.58, 4.123, 0.9915, 0.12596, 0.011061]
-
-    trap_x /= params.eps_unit
-    trap_y /= 1/params.time_unit
+    trap_y = 1e12u"Hz" * [3000., 2960, 2674, 1761, 650.8, 215.5, 27.58, 4.123, 0.9915, 0.12596, 0.011061]
 
     trap_x *= trap_mag
-    trap_y /= TotDensity(params)
+    trap_y /= gas.ρ
 
     gencf_trap = GENCF_INTERPLOG(trap_x, trap_y)
 
