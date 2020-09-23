@@ -110,7 +110,7 @@ function GenerateInitVel(style::PIVS_GAUSSIAN_ENERGY, ptype::PARTTYPE)
     eps = randn() * style.width + style.centre
 
     velmag = sqrt(2/ptype.mass*eps)
-    vel = velmag * VelVec([sinchi*cos(phi), sinchi*sin(phi), coschi])
+    vel = VelVec(velmag * [sinchi*cos(phi), sinchi*sin(phi), coschi])
 
     return vel
 end
