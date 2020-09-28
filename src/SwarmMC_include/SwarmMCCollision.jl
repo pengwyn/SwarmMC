@@ -153,8 +153,8 @@ function ReduceEnergy(part::PARTICLE, deps::Q(uE), eps_bin_grid::Vector)
     eps = EpsFromVel(part)
     final_eps = eps - deps
     velscale = sqrt(final_eps / eps)
-    UpdateEpsBin(part, eps_bin_grid)
     part.vel *= velscale
+    UpdateEpsBin(part, eps_bin_grid)
 end
 
 # function MeasureNonCons(props_set::PROPS_SET, params::PARAMS, part::PARTICLE, weight::Float64)
