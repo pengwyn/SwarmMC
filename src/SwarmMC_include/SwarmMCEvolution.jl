@@ -173,14 +173,14 @@ function CollisionAffect!(int)
     if cf_ind == NULL_IND
         RecordEvent!(params, Event_null)
     else
-        RecordEvent!(params, Event_coll ; part)
-
         # before_coll_eps = part.eps
         # before_coll_vel = part.vel
         # before_coll_weight = part.weight
 
         # Need to save this off, in case HandleCollFreq changes the ptype on us.
         this_cf = params.cf_list[part.ptype_ind][cf_ind]
+
+        RecordEvent!(params, Event_coll ; part, eps=EpsFromVel(part), this_cf)
 
         # FIXME: If HandleCollFreq wants to change the ptype, then it should do so by killing this particle and creating a new one.
 
@@ -205,6 +205,8 @@ function CollisionAffect!(int)
         if part.weight == 0uN
             terminate!(int)
         end
+
+        RecordEvent!(params, Event_coll ; old_eps_bin, part.eps_bin, bin_vals=params.eps_bin_grid[part.eps_bin:part.eps_bin+1])
 
         #weight_prefac = before_coll_weight * rellog2fac
         # weight_prefac = before_coll_weight
@@ -233,6 +235,8 @@ function CollisionAffect!(int)
     new_u_others = int.u[StaticArrays.SUnitRange(8,lastindex(int.u))]
     new_u = [new_u_core ; new_u_others]
     set_u!(int, new_u)
+
+    RecordEvent!(params, Event_coll ; new_C, pos, vel, eps=EpsFromVel(part))
     # Forcing the integrator to forget about the event having already been triggered.
     int.event_last_time = 0
 end
