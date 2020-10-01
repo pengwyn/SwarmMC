@@ -431,8 +431,12 @@ function SetupIntegrator(params)
                               internalnorm=MyNorm,
                               # Need a choice for dt to avoid warnings from a bad dfdt returned from PARTICLE()
                               dt=1.0,
-                              reltol=1e-6,
-                              abstol=0)
+                              reltol=1e-8,
+                              abstol=0,
+                              # With abstol=0, need to have some way to continue even when zeros are set.
+                              dtmin=ustrip(uT,first(diff(params.t_grid))) / 10^8,
+                              force_dtmin=true
+                              )
 end
 
 function ReinitIntegrator!(int, part, props_out, time_final)
