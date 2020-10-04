@@ -280,11 +280,11 @@ end
 
     cfset = []
     for cs in set
-        eps = cs.energy * ustrip(u"J",1eV) / params.eps_unit
-        csval = cs.cs/params.len_unit^2
-        threshold = cs.threshold * ustrip(u"J",1eV) / params.eps_unit
+        eps = cs.energy * ustrip(u"J",1eV) #/ params.eps_unit
+        csval = cs.cs#/params.len_unit^2
+        threshold = cs.threshold * ustrip(u"J",1eV) #/ params.eps_unit
 
-        cf = CreateCollFreq(params, gas, ptype, cs.name, cs.colltype, GENCF_INTERP(eps, csval), threshold=threshold, temperature=temperature ; ionise_kwds...)
+        cf = CreateCollFreq(params, gas, ptype, cs.name, cs.colltype, GENCF_INTERP(eps, csval), threshold=threshold; ionise_kwds...)
         push!(cfset, cf)
     end
 
